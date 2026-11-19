@@ -1,0 +1,54 @@
+# Entornos virtuales y variables locales
+.venv/
+.venv_*/
+venv/
+env/
+ENV/
+.env
+.env.*
+!.env.example
+
+# Cachés y artefactos de Python/Jupyter
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Datos locales: conservar únicamente la estructura mediante .gitkeep
+data/**/*
+!data/**/
+!data/**/.gitkeep
+*.parquet
+*.arrow
+*.feather
+*.avro
+*.orc
+*.csv
+*.tsv
+*.jsonl
+*.ndjson
+*.sqlite
+*.sqlite3
+*.db
+*.gz
+*.bz2
+*.xz
+*.zip
+*.7z
+
+# Informes, salidas y archivos temporales generados
+output/pdf/
+output/pdfs/
+tmp/pdfs/
+informe_p2/
+
+# Infraestructura GCP excluida de este repositorio
+infraestructura_gcp/
+
+# Archivos locales del sistema y editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

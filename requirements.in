@@ -1,0 +1,11 @@
+pyspark==4.3.0
+pyarrow==26.0.1
+pandas==2.3.3
+numpy==2.5.4
+duckdb==2.0.0
+requests==2.34.2
+matplotlib==3.11.2
+seaborn==0.13.2
+plotly==7.1.0
+jupyterlab==4.6.5
+ipykernel==7.4.0
