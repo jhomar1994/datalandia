@@ -1,0 +1,8 @@
+# Dependencias directas del pipeline Beam y publicador existentes.
+# preparar_muestras.py usa DuckDB desde el entorno local.
+# setuptools permite construir el paquete propio para los workers.
+apache-beam[gcp]==2.71.0
+google-cloud-pubsub==2.43.0
+google-cloud-bigquery==3.47.0
+google-cloud-storage==2.19.0
+setuptools==84.2.1

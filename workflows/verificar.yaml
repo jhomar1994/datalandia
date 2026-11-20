@@ -1,0 +1,24 @@
+main:
+  steps:
+  - configurar:
+      assign:
+      - project_id: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
+      - q_viajes: ${"(SELECT COUNT(*) FROM `" + project_id + ".lumina_demo.viajes_validos`) viajes"}
+      - q_sensores: ${"(SELECT COUNT(*) FROM `" + project_id + ".lumina_demo.sensores_validos`) sensores_recibidos"}
+      - q_unicos: ${"(SELECT COUNT(DISTINCT event_id) FROM `" + project_id + ".lumina_demo.sensores_validos`) eventos_unicos"}
+      - q_rechazados: ${"(SELECT COUNT(*) FROM `" + project_id + ".lumina_demo.rechazados`) rechazados_unicos"}
+      - q_conflictos: ${"(SELECT COUNT(*) FROM `" + project_id + ".lumina_demo.conflictos_sensores`) conflictos"}
+      - q_cruces: ${"(SELECT COUNT(*) FROM `" + project_id + ".lumina_demo.gold_zona_5min` WHERE viajes IS NOT NULL) cruces"}
+  - consultar:
+      call: googleapis.bigquery.v2.jobs.query
+      args:
+        projectId: ${project_id}
+        body:
+          location: us-central1
+          useLegacySql: false
+          maximumBytesBilled: '5368709120'
+          query: ${"SELECT " + q_viajes + ", " + q_sensores + ", " + q_unicos + ", " + q_rechazados + ", " + q_conflictos
+            + ", " + q_cruces}
+      result: resultado
+  - devolver:
+      return: ${resultado}

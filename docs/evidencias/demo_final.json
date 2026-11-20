@@ -1,0 +1,216 @@
+{
+  "verified_at_utc": "2026-11-20T10:07:38.333242+00:00",
+  "project": "proyecto-datalandia",
+  "project_number": "637872675138",
+  "region": "us-central1",
+  "batch": {
+    "name": "lumina-p3-batch-20261120093854",
+    "job_id": "2026-11-20_01_39_13-17840352199966583616",
+    "mode": "batch",
+    "batch_id": "lumina-p3-batch-20261120093854",
+    "project": "proyecto-datalandia",
+    "region": "us-central1",
+    "final_state": "JOB_STATE_DONE",
+    "elapsed_seconds": 290,
+    "transitions": [
+      {
+        "state": "JOB_STATE_PENDING",
+        "elapsed_seconds": 22
+      },
+      {
+        "state": "JOB_STATE_RUNNING",
+        "elapsed_seconds": 33
+      },
+      {
+        "state": "JOB_STATE_DONE",
+        "elapsed_seconds": 290
+      }
+    ],
+    "shutdown_confirmed": true,
+    "error": null,
+    "input_uri": "gs://proyecto-datalandia-637872675138-data/p3/smoke/83a7f532df3143f250b81d6facf9c76dc7b4686e22d252bee512183d53051d6b/viajes.jsonl",
+    "input_records": 10000,
+    "observed": {
+      "staged": 8459,
+      "trips": 8459,
+      "zones": 255,
+      "total_usd": 301703.37,
+      "rejected": 1541
+    },
+    "machine_type": "n1-standard-1",
+    "workers": 1,
+    "disk_gb": 30,
+    "private_ip": true,
+    "merge_executions": 2,
+    "canonical_rows_unchanged_after_merge": true,
+    "resource_metrics": [
+      {
+        "name": "TotalVcpuTime",
+        "value": 186,
+        "updated_at": "2026-11-20T09:43:44.004Z"
+      },
+      {
+        "name": "TotalMemoryUsage",
+        "value": 716945,
+        "updated_at": "2026-11-20T09:43:44.004Z"
+      },
+      {
+        "name": "TotalPdUsage",
+        "value": 5601,
+        "updated_at": "2026-11-20T09:43:44.004Z"
+      },
+      {
+        "name": "TotalSsdUsage",
+        "value": 0,
+        "updated_at": "2026-11-20T09:43:44.004Z"
+      }
+    ]
+  },
+  "stream": {
+    "name": "lumina-p3-stream-20261120095819",
+    "job_id": "2026-11-20_01_58_39-17646881497672993381",
+    "mode": "stream",
+    "batch_id": null,
+    "project": "proyecto-datalandia",
+    "region": "us-central1",
+    "final_state": "JOB_STATE_DRAINED",
+    "elapsed_seconds": 493,
+    "transitions": [
+      {
+        "state": "JOB_STATE_PENDING",
+        "elapsed_seconds": 22
+      },
+      {
+        "state": "JOB_STATE_RUNNING",
+        "elapsed_seconds": 125
+      },
+      {
+        "state": "JOB_STATE_DRAINING",
+        "elapsed_seconds": 379
+      },
+      {
+        "state": "JOB_STATE_DRAINED",
+        "elapsed_seconds": 493
+      }
+    ],
+    "shutdown_confirmed": true,
+    "error": null,
+    "expected": {
+      "messages": 225,
+      "valid_copies": 184,
+      "rejected": 41,
+      "reasons": {
+        "metrica_no_numerica": 11,
+        "valor_no_numerico": 30
+      },
+      "valid_ids": 182
+    },
+    "observed": {
+      "valid_copies": 184,
+      "valid_ids": 182,
+      "rejected": 41,
+      "zones": 11,
+      "conflicts": 1,
+      "gold_readings": 181
+    },
+    "machine_type": "n1-standard-2",
+    "workers": 1,
+    "disk_gb": 30,
+    "private_ip": true,
+    "streaming_engine": true,
+    "event_id": "demo-p3-6d879f3eaf43467db1623b978daeb2e0",
+    "published_at": "2026-11-20T10:04:11.852908+00:00",
+    "processed_at": "2026-11-20T10:04:15.673395Z",
+    "api_observed_at": "2026-11-20T10:04:21.698676+00:00",
+    "client_observation_upper_bound_seconds": 11.998,
+    "measurement": "Un evento con worker listo; sondeo cada cinco segundos y consultas de verificación. El límite cliente de 11,998 s incluye consultas de control posteriores a la respuesta del evento; no es percentil ni SLA. Arranque inicial excluido.",
+    "duplicate_copies": 2,
+    "conflict_http_status": 409,
+    "resource_metrics": [
+      {
+        "name": "TotalVcpuTime",
+        "value": 493,
+        "updated_at": "2026-11-20T10:05:51.291Z"
+      },
+      {
+        "name": "TotalMemoryUsage",
+        "value": 1896170,
+        "updated_at": "2026-11-20T10:05:51.291Z"
+      },
+      {
+        "name": "TotalPdUsage",
+        "value": 7406,
+        "updated_at": "2026-11-20T10:05:51.291Z"
+      },
+      {
+        "name": "TotalStreamingDataProcessed",
+        "value": 0.0005555581301450729,
+        "updated_at": "2026-11-20T10:05:51.291Z"
+      }
+    ]
+  },
+  "api": {
+    "url": "https://lumina-api-dpywj6jn3q-uc.a.run.app",
+    "authentication": "IAM; proxy local para demo",
+    "anonymous_status": 403,
+    "min_instances": 0,
+    "max_instances": 1,
+    "cpu": 0.25,
+    "memory_mib": 256,
+    "image": "us-central1-docker.pkg.dev/proyecto-datalandia/lumina-images/lumina-api@sha256:828a057488b66f1495b4d714882a0ee308eebadda228c9f041da53ba38ef08f8",
+    "build_id": "a9326519-e4b1-4422-8e82-afae271b2fe0",
+    "checks": [
+      {
+        "route": "/health",
+        "status": 200,
+        "seconds": 0.256
+      },
+      {
+        "route": "/api/zones",
+        "status": 200,
+        "seconds": 5.409
+      },
+      {
+        "route": "/api/metrics",
+        "status": 200,
+        "seconds": 1.445
+      },
+      {
+        "route": "/api/quality",
+        "status": 200,
+        "seconds": 1.176
+      },
+      {
+        "route": "/",
+        "status": 200,
+        "seconds": 0.303
+      }
+    ],
+    "visual_review": "NO VERIFICADO: host de navegador no disponible"
+  },
+  "shutdown": {
+    "active_dataflow_jobs": 0,
+    "vm_count": 0,
+    "verified_at_utc": "2026-11-20T10:07:38.333242+00:00"
+  },
+  "checks": {
+    "unit_and_http_tests": 15,
+    "bigquery_integration_tests": 2,
+    "terraform_validate": "PASS",
+    "terraform_plan": "No changes",
+    "javascript_syntax": "PASS",
+    "private_references_ignored": true
+  },
+  "costs": {
+    "budget_total_pen": 50,
+    "actual_billed": "NO VERIFICADO",
+    "credits": "NO VERIFICADO"
+  },
+  "limitations": [
+    "Prueba funcional con un worker; no benchmark masivo ni escalabilidad horizontal.",
+    "Homologación territorial y desplazamiento temporal simulados.",
+    "Workflows verifica conteos, no administra recuperación ni ciclo de vida de jobs.",
+    "El watchdog local requiere equipo y proceso activos.",
+    "Publicación de cambios en GitHub y Slides nativo pendientes."
+  ]
+}

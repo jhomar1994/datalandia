@@ -1,0 +1,190 @@
+{
+  "verified_at_utc": "2026-11-20T09:20:51.932039+00:00",
+  "project": "proyecto-datalandia",
+  "unit_tests": 12,
+  "bigquery_integration_tests": {
+    "merge": {
+      "job_id": "a8966dce-a5ca-4c3b-b941-dadc38341013",
+      "state": "DONE",
+      "bytes_processed": 1011,
+      "trip_count_after_retry_and_conflict": 2,
+      "total_usd": 30,
+      "uses_temporary_tables": true
+    },
+    "sensor_gold": {
+      "job_id": "9efd6e64-2e0f-41c8-a38e-7002a190021e",
+      "state": "DONE",
+      "bytes_processed": 457,
+      "canonical_readings": 2,
+      "average": 20,
+      "conflicting_ids": 1,
+      "uses_temporary_tables": true
+    }
+  },
+  "directrunner": {
+    "batch": {
+      "accepted": 86368,
+      "rejected": 13632,
+      "zones_accepted": 255,
+      "reasons": [
+        [
+          "distancia_invalida",
+          9979
+        ],
+        [
+          "zona_invalida_origin_id",
+          1572
+        ],
+        [
+          "importe_invalido",
+          1083
+        ],
+        [
+          "zona_invalida_destination_id",
+          860
+        ],
+        [
+          "duracion_invalida",
+          128
+        ],
+        [
+          "fecha_fuera_periodo",
+          10
+        ]
+      ]
+    },
+    "stream": {
+      "accepted": 9376,
+      "rejected": 1625,
+      "zones_accepted": 11,
+      "reasons": [
+        [
+          "valor_no_numerico",
+          1051
+        ],
+        [
+          "metrica_no_numerica",
+          574
+        ]
+      ]
+    }
+  },
+  "input_counts": {
+    "viajes": 100000,
+    "sensores": 11000,
+    "puente_batch": 2694,
+    "puente_stream": 11,
+    "referencia_zona": 263,
+    "catalogo_sensores": 193
+  },
+  "input_coverage": {
+    "trip_origin_zones": 260,
+    "sensor_nodes": 11,
+    "sensor_zones": 11
+  },
+  "bundle_id": "a3453d3048051f31aa78fd5b52bb8e9e81ba2463374b8ecd7bd495d9dc668d3d",
+  "tables": {
+    "conflictos_sensores": {
+      "type": "VIEW",
+      "rows": 0,
+      "partition_field": null,
+      "clustering": []
+    },
+    "gold_movilidad_5min": {
+      "type": "VIEW",
+      "rows": 0,
+      "partition_field": null,
+      "clustering": []
+    },
+    "gold_sensores_5min": {
+      "type": "VIEW",
+      "rows": 0,
+      "partition_field": null,
+      "clustering": []
+    },
+    "gold_zona_5min": {
+      "type": "VIEW",
+      "rows": 0,
+      "partition_field": null,
+      "clustering": []
+    },
+    "puente_batch": {
+      "type": "TABLE",
+      "rows": 2694,
+      "partition_field": null,
+      "clustering": []
+    },
+    "puente_stream": {
+      "type": "TABLE",
+      "rows": 11,
+      "partition_field": null,
+      "clustering": []
+    },
+    "rechazados": {
+      "type": "VIEW",
+      "rows": 0,
+      "partition_field": null,
+      "clustering": []
+    },
+    "rechazados_raw": {
+      "type": "TABLE",
+      "rows": 0,
+      "partition_field": "processed_at",
+      "clustering": [
+        "source",
+        "reason"
+      ]
+    },
+    "referencia_zona": {
+      "type": "TABLE",
+      "rows": 263,
+      "partition_field": null,
+      "clustering": []
+    },
+    "sensores_validos": {
+      "type": "TABLE",
+      "rows": 0,
+      "partition_field": "event_ts",
+      "clustering": [
+        "zone_id",
+        "node_id",
+        "sensor",
+        "parameter"
+      ]
+    },
+    "viajes_staging": {
+      "type": "TABLE",
+      "rows": 0,
+      "partition_field": "processed_at",
+      "clustering": [
+        "batch_id",
+        "origin_id"
+      ]
+    },
+    "viajes_validos": {
+      "type": "TABLE",
+      "rows": 0,
+      "partition_field": "pickup_local",
+      "clustering": [
+        "trip_id",
+        "origin_id"
+      ]
+    }
+  },
+  "terraform_added_in_this_phase": 13,
+  "terraform_managed_total": 57,
+  "terraform_postapply_no_changes": true,
+  "workflow_state": "SUCCEEDED",
+  "workflow_counts": {
+    "viajes": 0,
+    "sensores_recibidos": 0,
+    "eventos_unicos": 0,
+    "rechazados_unicos": 0,
+    "conflictos": 0,
+    "cruces": 0
+  },
+  "active_dataflow_jobs": 0,
+  "vm_count": 0,
+  "dataproc_api_enabled": false,
+  "distributed_execution_tested": false
+}

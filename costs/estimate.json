@@ -1,0 +1,56 @@
+{
+  "date": "2026-11-20",
+  "region": "us-central1",
+  "fx_assumption_pen_per_usd": 4.0,
+  "actual_bill": "NO VERIFICADO",
+  "credits_free_tier_applied": false,
+  "assumptions": {
+    "batch_hours_month": 10,
+    "query_tib_month": 0.1,
+    "average_bq_gib": 10,
+    "pubsub_throughput_gib_month": 2,
+    "secu_per_stream_hour": 2,
+    "secu_sizing_verified": false,
+    "retention": "Mantener almacenamiento medio de 10 GiB; requiere política de purga para crecimiento continuo"
+  },
+  "on_demand": {
+    "stream_hours_month": 10,
+    "items_usd_month": {
+      "dataflow_batch_cpu_memory": 0.6934,
+      "dataflow_stream_cpu_memory": 1.6468,
+      "streaming_engine_planning": 1.78,
+      "worker_disks_reserve": 0.0411,
+      "bigquery_queries": 0.625,
+      "bigquery_storage": 0.23,
+      "bigquery_stream_inserts_reserve": 0.5,
+      "pubsub_publish_subscribe": 0.0781,
+      "gcs_storage_operations_reserve": 2.0,
+      "cloud_run_requests_compute_reserve": 1.0,
+      "build_registry_logging_workflows_reserve": 2.0
+    },
+    "contingency_fraction": 0.3,
+    "usd_month": 13.77,
+    "usd_year": 165.27,
+    "pen_year": 661.09
+  },
+  "continuous": {
+    "stream_hours_month": 730,
+    "items_usd_month": {
+      "dataflow_batch_cpu_memory": 0.6934,
+      "dataflow_stream_cpu_memory": 120.2146,
+      "streaming_engine_planning": 129.94,
+      "worker_disks_reserve": 1.5205,
+      "bigquery_queries": 0.625,
+      "bigquery_storage": 0.23,
+      "bigquery_stream_inserts_reserve": 0.5,
+      "pubsub_publish_subscribe": 0.0781,
+      "gcs_storage_operations_reserve": 2.0,
+      "cloud_run_requests_compute_reserve": 1.0,
+      "build_registry_logging_workflows_reserve": 2.0
+    },
+    "contingency_fraction": 0.3,
+    "usd_month": 336.44,
+    "usd_year": 4037.31,
+    "pen_year": 16149.22
+  }
+}

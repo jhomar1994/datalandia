@@ -8,6 +8,20 @@ ENV/
 .env.*
 !.env.example
 
+# Credenciales y llaves locales: nunca forman parte del entregable
+.credentials/
+credentials/
+secrets/
+credentials.json
+secrets.json
+application_default_credentials.json
+*service-account*.json
+*service_account*.json
+*.pem
+*.key
+*.p12
+*.pfx
+
 # Cachés y artefactos de Python/Jupyter
 __pycache__/
 *.py[cod]
@@ -15,6 +29,12 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 .ipynb_checkpoints/
+/*.egg-info/
+/build/
+/dist/
+.coverage
+htmlcov/
+*.log
 
 # Datos locales: conservar únicamente la estructura mediante .gitkeep
 data/**/*
@@ -43,9 +63,28 @@ output/pdf/
 output/pdfs/
 tmp/pdfs/
 informe_p2/
+/reports/**/*.pdf
 
-# Infraestructura GCP excluida de este repositorio
-infraestructura_gcp/
+# Publicar únicamente las versiones finales de la presentación
+/presentation/output/*
+!/presentation/output/Lumina_P3_15min.pptx
+!/presentation/output/Lumina_P3_15min.pdf
+
+# Material de evaluación de uso local: rúbricas y observaciones del docente
+/referencias_locales/
+
+# Fixtures sintéticos versionables
+!/tests/fixtures/*.jsonl
+
+# Terraform: conservar .tf, ejemplos y .terraform.lock.hcl
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+*.tfvars.json
+crash.log
+crash.*.log
 
 # Archivos locales del sistema y editores
 .DS_Store

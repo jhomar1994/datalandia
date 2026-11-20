@@ -1,0 +1,180 @@
+{
+  "verified_at_utc": "2026-11-20T11:14:31.385170+00:00",
+  "project": "proyecto-datalandia",
+  "revision": "lumina-api-00003-m82",
+  "image": "us-central1-docker.pkg.dev/proyecto-datalandia/lumina-images/lumina-api@sha256:2ff9f5db208d243ad159d46707e57d6c8c09d7bd08e82f10637fe8b70bdb2064",
+  "html": {
+    "path": "api/static/index.html",
+    "sha256": "b19dd1b8fd6112ac5b6b1cc70d39bc5db8a08cff9ff021c5248f76e57392beae",
+    "design_unchanged": true,
+    "javascript_only_fix": "num(null) must return null, not zero"
+  },
+  "contract_tests_passed": 18,
+  "http_status_new_routes": 200,
+  "removed_route_status": {
+    "/ventanas": 404
+  },
+  "minutes": {
+    "elements": 15,
+    "ascending": true,
+    "zero_filled": true
+  },
+  "fresh_server_now_on_cache_hit": true,
+  "browser_review": {
+    "browser": "Google Chrome, native UI",
+    "simulated_mode": true,
+    "real_cloud_run_mode": true,
+    "observed_blue_orange_bars": true,
+    "observed_auto_refresh": true,
+    "accepted_count_observed_from": 185,
+    "accepted_count_observed_to": 215,
+    "last_value_observed_from": 10.4,
+    "last_value_observed_to": 12.9,
+    "left_paused": true
+  },
+  "partitions": {
+    "sensores_validos": "event_ts",
+    "rechazados": "VIEW",
+    "rechazados_raw": "processed_at",
+    "modified": false
+  },
+  "pipeline": {
+    "stream_method": "STREAMING_INSERTS",
+    "batch_method": "FILE_LOADS",
+    "triggering_frequency": "not configured",
+    "modified": false
+  },
+  "live_test": {
+    "job": {
+      "name": "lumina-p3-stream-20261120110633",
+      "job_id": "2026-11-20_03_06_52-4463818182030948028",
+      "mode": "stream",
+      "batch_id": null,
+      "project": "proyecto-datalandia",
+      "region": "us-central1",
+      "final_state": "JOB_STATE_DRAINED",
+      "elapsed_seconds": 453,
+      "transitions": [
+        {
+          "state": "JOB_STATE_PENDING",
+          "elapsed_seconds": 23
+        },
+        {
+          "state": "JOB_STATE_RUNNING",
+          "elapsed_seconds": 33
+        },
+        {
+          "state": "JOB_STATE_DRAINING",
+          "elapsed_seconds": 329
+        },
+        {
+          "state": "JOB_STATE_DRAINED",
+          "elapsed_seconds": 453
+        }
+      ],
+      "shutdown_confirmed": true,
+      "error": null
+    },
+    "messages_published": 257,
+    "new_live_events": 30,
+    "invalid_fixture_messages": 2,
+    "control_event": "demo-p3-984de38623ac463a91f29eeeb157ba84",
+    "control_availability_seconds": 1.35,
+    "last_event": {
+      "event_id": "demo-p3-984de38623ac463a91f29eeeb157ba84-live-29",
+      "zona_id": "DL-132",
+      "node_id": "001e0610ba57",
+      "sensor": "apds_9006_020",
+      "parameter": "intensity",
+      "value": 12.9,
+      "unit": "lux",
+      "published_at": "2026-11-20T11:11:36.929568Z",
+      "processed_at": "2026-11-20T11:11:37.307898Z",
+      "latencia_s": 0.37833,
+      "ahora": "2026-11-20T11:11:43.651375+00:00"
+    },
+    "points": [
+      {
+        "minuto": "2026-11-20T10:57:00Z",
+        "aceptadas": 0,
+        "rechazadas": 0
+      },
+      {
+        "minuto": "2026-11-20T10:58:00Z",
+        "aceptadas": 0,
+        "rechazadas": 0
+      },
+      {
+        "minuto": "2026-11-20T10:59:00Z",
+        "aceptadas": 0,
+        "rechazadas": 0
+      },
+      {
+        "minuto": "2026-11-20T11:00:00Z",
+        "aceptadas": 0,
+        "rechazadas": 0
+      },
+      {
+        "minuto": "2026-11-20T11:01:00Z",
+        "aceptadas": 0,
+        "rechazadas": 0
+      },
+      {
+        "minuto": "2026-11-20T11:02:00Z",
+        "aceptadas": 0,
+        "rechazadas": 0
+      },
+      {
+        "minuto": "2026-11-20T11:03:00Z",
+        "aceptadas": 0,
+        "rechazadas": 0
+      },
+      {
+        "minuto": "2026-11-20T11:04:00Z",
+        "aceptadas": 0,
+        "rechazadas": 0
+      },
+      {
+        "minuto": "2026-11-20T11:05:00Z",
+        "aceptadas": 0,
+        "rechazadas": 0
+      },
+      {
+        "minuto": "2026-11-20T11:06:00Z",
+        "aceptadas": 0,
+        "rechazadas": 0
+      },
+      {
+        "minuto": "2026-11-20T11:07:00Z",
+        "aceptadas": 0,
+        "rechazadas": 0
+      },
+      {
+        "minuto": "2026-11-20T11:08:00Z",
+        "aceptadas": 0,
+        "rechazadas": 0
+      },
+      {
+        "minuto": "2026-11-20T11:09:00Z",
+        "aceptadas": 0,
+        "rechazadas": 0
+      },
+      {
+        "minuto": "2026-11-20T11:10:00Z",
+        "aceptadas": 2,
+        "rechazadas": 1
+      },
+      {
+        "minuto": "2026-11-20T11:11:00Z",
+        "aceptadas": 30,
+        "rechazadas": 2
+      }
+    ]
+  },
+  "shutdown": {
+    "active_dataflow_jobs": 0,
+    "vm_count": 0
+  },
+  "billed_cost": "NO VERIFICADO",
+  "terraform_final_plan": "No changes"
+}

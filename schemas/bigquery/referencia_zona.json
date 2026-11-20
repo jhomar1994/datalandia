@@ -1,0 +1,57 @@
+[
+  {
+    "name": "datalandia_zone_id",
+    "type": "STRING",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "zone_id",
+    "type": "INTEGER",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "zone_name",
+    "type": "STRING",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "borough",
+    "type": "STRING",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "population_2017",
+    "type": "FLOAT",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "young_18_30_2017",
+    "type": "FLOAT",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "older_65_plus_2017",
+    "type": "FLOAT",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "urban_population_2017",
+    "type": "FLOAT",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "communes_assigned",
+    "type": "INTEGER",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "uber_mean_seconds_2017",
+    "type": "FLOAT",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "uber_destinations_assigned",
+    "type": "INTEGER",
+    "mode": "NULLABLE"
+  }
+]

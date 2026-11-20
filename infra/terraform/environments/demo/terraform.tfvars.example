@@ -1,0 +1,8 @@
+# Copiar a terraform.tfvars en este directorio; el archivo local está excluido de Git.
+project_id              = "proyecto-datalandia"
+expected_project_number = "637872675138"
+region                  = "us-central1"
+bucket_name             = "proyecto-datalandia-637872675138-data"
+dataset_id              = "lumina_demo"
+resource_prefix         = "lumina"
+subnet_cidr             = "10.42.0.0/24"

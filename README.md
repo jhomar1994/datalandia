@@ -2,6 +2,8 @@
 
 Proyecto de integración y analítica que combina información de movilidad, sensores y contexto demográfico mediante una arquitectura medallón **Raw/Bronze → Silver → Gold**.
 
+**¿Primera vez en el proyecto?** Leer la [guía de onboarding técnico](docs/onboarding_tecnico.md): explica la evolución desde las fuentes originales y el procesamiento local hasta Terraform, los pipelines GCP, la API y la demo final, con resultados y pendientes.
+
 La implementación incluye procesamiento batch con DuckDB y Spark, microbatch con Spark Structured Streaming, homologación de fuentes heterogéneas y estructuras analíticas materializadas en Parquet y SQLite.
 
 ## Capacidades principales
@@ -14,11 +16,13 @@ La implementación incluye procesamiento batch con DuckDB y Spark, microbatch co
 - Cuarentena de registros inválidos con el motivo del rechazo.
 - Agregaciones analíticas por zona y ventanas de cinco minutos.
 - Modelo Gold con hechos de movilidad, hechos de sensores y dimensión territorial.
-- Aprovisionamiento manual de servicios administrados en Google Cloud mediante comandos de shell.
+- Aprovisionamiento reproducible de la infraestructura base GCP con Terraform.
 
 > **Importante:** las homologaciones entre ciudades y algunos datos del caso DataLandia son simulados con fines académicos. No representan equivalencias geográficas reales.
 
-## Arquitectura
+## Arquitectura del procesamiento local
+
+La [guía de onboarding](docs/onboarding_tecnico.md#5-arquitectura-final-y-aprovisionamiento) incluye el diagrama de la implementación final en GCP.
 
 ```text
 Fuentes heterogéneas
@@ -41,88 +45,79 @@ data/gold / data/p2/gold
   └─ hechos, dimensiones y vistas listas para consulta
 ```
 
-## Infraestructura en Google Cloud
+## Estado del proyecto
 
-Además de la ejecución local, se aprovisionó manualmente una arquitectura de demostración en **Google Cloud Platform** usando comandos `gcloud` y `bq`. No se utilizó Terraform.
-
-Los recursos utilizados fueron:
-
-| Servicio | Recurso o función |
+| Componente | Estado |
 |---|---|
-| Cloud Storage | Bucket `gs://datalandia-lumina-prototipo` para muestras y entradas batch. |
-| Pub/Sub | Topic `lumina-eventos` y suscripción `lumina-streaming` para eventos de sensores. |
-| Dataflow | Pipelines Apache Beam para validación batch y consumo streaming. |
-| BigQuery | Dataset `datalandia.lumina_demo` con datos válidos, rechazados y vista Gold. |
-| Workflows | Workflow `lumina-verificar` para ejecutar controles de conteos en BigQuery. |
-| IAM | Cuentas de servicio separadas para workers de Dataflow y orquestación. |
-| VPC | Red y subred privadas para los workers, con Private Google Access y sin IP pública. |
+| Procesamiento local | Implementado con DuckDB, Spark y SQLite. |
+| Histórico GCP de P2 | Registro de la demostración en el proyecto anterior `datalandia`. |
+| Pipelines cloud P3 | Batch y streaming ejecutados en Dataflow; validación end-to-end con API realizada. |
+| Destino de P3 | `proyecto-datalandia`, número `637872675138`, región `us-central1`. |
+| Infraestructura GCP | Terraform aplicado: red, IAM, buckets, Pub/Sub, siete tablas, cinco vistas, workflow y Cloud Run. |
+| API y consumidor P3 | FastAPI y tablero desplegados en Cloud Run privado; mínimo cero y máximo una instancia. |
 
-El flujo desplegado fue:
+El código cloud está en `pipelines/cloud/`, el SQL en `sql/bigquery/` y el workflow en `workflows/`.
+El destino por defecto ya es `proyecto-datalandia`. Los CLI admiten parámetros de destino; `.env.example`
+no se carga automáticamente. Consultar [pipelines P3](docs/pipelines_p3.md),
+[infraestructura](infra/terraform/README.md) y [evidencia inicial](docs/evidencias/infraestructura_base.md).
 
-```text
-Batch:     Cloud Storage ──► Dataflow / Apache Beam ──► BigQuery
-Streaming: Pub/Sub ────────► Dataflow / Apache Beam ──► BigQuery
-                                                        │
-                                                        ▼
-                                               vista Gold de 5 minutos
-                                                        │
-                                                        ▼
-                                             verificación con Workflows
-```
+La demostración del 8 de noviembre de 2026 utilizó muestras y los jobs se detuvieron tras
+las pruebas. Ese resultado histórico no implica que hoy exista un job activo.
 
-La demostración registrada el **8 de noviembre de 2026** procesó una muestra de viajes y eventos de sensores, incluyó registros inválidos para comprobar la cuarentena y republicó eventos para validar la deduplicación de la vista Gold. Los jobs de Dataflow se cancelaron después de la prueba para limitar costos; por tanto, el repositorio no presupone que exista actualmente un job streaming activo.
+## Demo final P3
 
-El aprovisionamiento se realizó desde Cloud Shell con operaciones equivalentes a las siguientes:
+Los siguientes conteos describen la prueba inicial. Las repeticiones añaden eventos; la actualización del tablero está documentada en [evidencias de monitoreo](docs/evidencias/actualizacion_tablero.md).
+
+- Batch real de 10.000 registros: 8.459 viajes válidos, 1.541 rechazos y 255 zonas válidas de origen.
+- Streaming de 225 mensajes: 184 recepciones válidas, 41 rechazos, once zonas y 181 eventos únicos en Gold.
+- Evento de control disponible en la API en aproximadamente doce segundos con el worker listo; medición de un caso, no un SLA.
+- Duplicados y conflictos comprobados; quince pruebas unitarias/HTTP y dos integraciones SQL en BigQuery aprobadas.
+
+Acceso al tablero privado:
 
 ```bash
-# APIs
-gcloud services enable \
-  dataflow.googleapis.com bigquery.googleapis.com pubsub.googleapis.com \
-  storage.googleapis.com iam.googleapis.com compute.googleapis.com
-
-# Almacenamiento
-gcloud storage buckets create gs://datalandia-lumina-prototipo \
-  --location=us-central1 \
-  --uniform-bucket-level-access \
-  --public-access-prevention
-
-# Mensajería
-gcloud pubsub topics create lumina-eventos
-gcloud pubsub subscriptions create lumina-streaming \
-  --topic=lumina-eventos \
-  --message-retention-duration=1d
-
-# Almacén analítico
-bq mk --dataset --location=us-central1 datalandia:lumina_demo
-
-# Identidad de los workers
-gcloud iam service-accounts create lumina-dataflow \
-  --display-name="Lumina Dataflow worker"
+gcloud run services proxy lumina-api --project=proyecto-datalandia --region=us-central1 --port=8080
 ```
 
-Estos comandos documentan el procedimiento, pero no deben ejecutarse sin verificar previamente el proyecto activo, facturación, permisos, recursos existentes y posibles costos. Los nombres globales —como el del bucket— deben cambiarse al reproducir la solución en otro proyecto.
+Abrir `http://127.0.0.1:8080`. Para la demo en vivo, en otra terminal:
 
-La carpeta local `infraestructura_gcp/` contiene los scripts de Beam, SQL Gold, publicación y verificación usados durante la demostración, pero está excluida de Git por la política actual del archivo `.gitignore`.
+```bash
+.venv_beam/bin/python scripts/demo_e2e.py --visible-seconds 30
+```
+
+Consultar [guion y apagado](demo/README.md), [API](api/README.md),
+[evidencias](docs/evidencias/demo_final.json), [observaciones P2](docs/revision_observaciones_p2.md),
+[costos](costs/README.md) y [borrador para Slides](presentation/guion_slides.md).
+Presupuesto total de pruebas y demo: S/50; gasto facturado NO VERIFICADO.
+La ejecución se realiza bajo demanda, sin mantener streaming 24/7.
+El tablero nuevo se revisó en Chrome en modo simulado y con la API. La presentación ejecutiva de quince minutos está disponible en `presentation/output/` (PPTX y PDF). La publicación de los cambios en GitHub sigue pendiente.
 
 ## Estructura del repositorio
 
 ```text
 datalandia/
-├── data/
-│   ├── raw/                     # Fuentes originales
-│   ├── silver/                  # Datos limpios, puentes y checkpoints
-│   ├── gold/                    # Agregados analíticos
-│   └── p2/                      # Demostración híbrida batch/streaming
-├── notebooks/
-│   ├── 01_ETL_Medallion_Homologacion.py
-│   ├── 01_ETL_Medallion_Homologacion.ipynb
-│   ├── 02_puentes_batch_streaming.py
-│   ├── 02_Puentes_Batch_Streaming.ipynb
-│   ├── 03_p2_hibrido.py
-│   └── README_P2.md
-├── requirements.in             # Dependencias directas
-├── requirements.txt            # Dependencias fijadas
-└── setup_project.py            # Creación de la estructura básica
+├── pipelines/
+│   ├── local/                   # ETL medallón, puentes y procesamiento híbrido
+│   └── cloud/                   # Beam P3, contratos y publicador configurable
+├── notebooks/                   # Notebooks interactivos originales
+├── infra/terraform/             # Infraestructura base aplicada y verificada
+├── api/                         # FastAPI y contenedor Cloud Run
+├── consumer/                    # Tablero consumidor de la API
+├── sql/bigquery/                # Vista Gold
+├── workflows/                   # Verificación P3 en el proyecto actual
+├── schemas/                     # Esquemas BigQuery compartidos
+├── scripts/                     # Preparación y futuras operaciones
+├── requirements/                # Dependencias local y cloud separadas
+├── tests/                       # Reglas, MERGE real y fixtures históricos
+├── demo/                        # Guion de demostración
+├── costs/                       # Presupuesto y calculadora anual preliminar
+├── presentation/                # Presentación ejecutiva PPTX/PDF y guion de 15 min
+├── docs/                        # Guías y evidencias publicables
+├── reports/                     # Informes locales, PDF fuera de Git
+├── data/                        # Datos y checkpoints locales, fuera de Git
+├── referencias_locales/         # Rúbrica y observaciones, fuera de Git
+├── .env.example
+└── README.md
 ```
 
 Los datos no se versionan. Los archivos `.gitkeep` conservan la estructura de `data/` en Git sin subir CSV, Parquet, JSONL, bases SQLite ni checkpoints.
@@ -137,14 +132,16 @@ Las dependencias principales son PySpark 4.3, DuckDB 2.0, PyArrow, pandas y NumP
 
 ## Instalación
 
+Las dependencias cloud se instalan en otro entorno; consultar [requirements/README.md](requirements/README.md).
+
 Ejecute los comandos desde la raíz del proyecto:
 
 ```bash
 python3.12 -m venv .venv_bigdata
 source .venv_bigdata/bin/activate
 python -m pip install --upgrade pip
-pip install -r requirements.txt
-python setup_project.py
+pip install -r requirements/local.txt
+python scripts/setup_local.py
 ```
 
 En Windows, la activación del entorno cambia por:
@@ -155,7 +152,7 @@ En Windows, la activación del entorno cambia por:
 
 ## Fuentes de datos
 
-El primer pipeline descarga automáticamente el catálogo de zonas y los viajes amarillos de enero de 2024 de NYC TLC. Si no encuentra las otras fuentes, genera muestras sintéticas compatibles con ese ejercicio.
+El ejercicio `pipelines/local/etl_medallion.py` descarga automáticamente el catálogo de zonas y los viajes amarillos de enero de 2024 de NYC TLC. Si no encuentra las otras fuentes, genera muestras sintéticas compatibles con ese ejercicio.
 
 El pipeline de puentes y la demostración híbrida utilizan las siguientes rutas:
 
@@ -174,7 +171,7 @@ data/raw/
     └── sensors.csv
 ```
 
-Estas fuentes pesadas deben descargarse o copiarse localmente después de clonar el repositorio. No están incluidas en Git.
+Estas fuentes deben descargarse o copiarse localmente después de clonar el repositorio. No están incluidas en Git. El ETL medallón es un ejercicio independiente: sus fuentes sintéticas no sustituyen los archivos ni los catálogos requeridos por puentes y P2.
 
 ## Ejecución
 
@@ -183,7 +180,7 @@ Estas fuentes pesadas deben descargarse o copiarse localmente después de clonar
 Este ejercicio descarga NYC TLC, prepara las fuentes auxiliares y construye una tabla Gold horaria con Spark:
 
 ```bash
-.venv_bigdata/bin/python notebooks/01_ETL_Medallion_Homologacion.py
+.venv_bigdata/bin/python pipelines/local/etl_medallion.py
 ```
 
 También puede ejecutarse de forma interactiva con:
@@ -197,7 +194,7 @@ jupyter lab
 Requiere las fuentes originales indicadas anteriormente. Construye las tablas puente, procesa el replay de sensores con Spark Structured Streaming y genera el Gold de cinco minutos:
 
 ```bash
-.venv_bigdata/bin/python notebooks/02_puentes_batch_streaming.py
+.venv_bigdata/bin/python pipelines/local/puentes_batch_streaming.py
 ```
 
 Salidas principales:
@@ -217,19 +214,19 @@ Esta etapa depende de las tablas puente generadas por el paso anterior.
 Crear el batch inicial y la base analítica:
 
 ```bash
-.venv_bigdata/bin/python notebooks/03_p2_hibrido.py batch
+.venv_bigdata/bin/python pipelines/local/hibrido.py batch
 ```
 
 Iniciar el consumidor streaming en una terminal:
 
 ```bash
-.venv_bigdata/bin/python notebooks/03_p2_hibrido.py serve
+.venv_bigdata/bin/python pipelines/local/hibrido.py serve
 ```
 
 Publicar 1,000 lecturas históricas desde otra terminal:
 
 ```bash
-.venv_bigdata/bin/python notebooks/03_p2_hibrido.py publish \
+.venv_bigdata/bin/python pipelines/local/hibrido.py publish \
   --limit 1000 \
   --chunk-size 250 \
   --delay 1
@@ -238,13 +235,13 @@ Publicar 1,000 lecturas históricas desde otra terminal:
 Inyectar eventos de prueba válidos e inválidos:
 
 ```bash
-.venv_bigdata/bin/python notebooks/03_p2_hibrido.py inject
+.venv_bigdata/bin/python pipelines/local/hibrido.py inject
 ```
 
 Consultar microbatches, rechazos y ventanas procesadas:
 
 ```bash
-.venv_bigdata/bin/python notebooks/03_p2_hibrido.py status
+.venv_bigdata/bin/python pipelines/local/hibrido.py status
 ```
 
 Para detener el consumidor streaming, use `Ctrl+C`. El checkpoint permite continuar con los archivos que todavía no fueron procesados.
@@ -285,4 +282,6 @@ Una fila de `gold_zone_context_5min` representa una métrica de sensor dentro de
 - El workflow de verificación consulta resultados, pero no constituye una orquestación completa del ciclo de vida de Dataflow.
 - Los recursos cloud pueden generar costos y deben verificarse o detenerse después de cada prueba.
 
-Consulte [notebooks/README_P2.md](notebooks/README_P2.md) para el contrato de eventos, reglas de validación y detalles operativos de la demostración híbrida.
+Consulte [docs/ejecucion_local.md](docs/ejecucion_local.md) para el contrato de eventos, reglas de validación y detalles operativos de la demostración híbrida.
+
+La [guía de reorganización](docs/reestructuracion.md) relaciona las rutas anteriores con las actuales.
