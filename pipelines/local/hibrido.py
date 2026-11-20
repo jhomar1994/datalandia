@@ -1,6 +1,6 @@
 """P2 Lumina: batch validado y streaming continuo local (Spark + SQLite).
 
-Comandos: batch, serve, publish, inject, status. Ver README_P2.md.
+Comandos: batch, serve, publish, inject, status. Ver docs/ejecucion_local.md.
 No se modifican fuentes raw ni resultados v1.
 """
 from __future__ import annotations
@@ -20,7 +20,7 @@ from pathlib import Path
 
 import duckdb
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 RAW = ROOT / 'data/raw'
 V1 = ROOT / 'data/silver/datalandia_v1'
 BASE = ROOT / 'data/p2'

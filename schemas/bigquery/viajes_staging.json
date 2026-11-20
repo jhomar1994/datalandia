@@ -1,0 +1,52 @@
+[
+  {
+    "name": "trip_id",
+    "type": "STRING",
+    "mode": "REQUIRED"
+  },
+  {
+    "name": "payload_hash",
+    "type": "STRING",
+    "mode": "REQUIRED"
+  },
+  {
+    "name": "origin_id",
+    "type": "INTEGER",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "destination_id",
+    "type": "INTEGER",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "pickup_local",
+    "type": "DATETIME",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "dropoff_local",
+    "type": "DATETIME",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "distance_km",
+    "type": "FLOAT",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "total_usd",
+    "type": "FLOAT",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "processed_at",
+    "type": "TIMESTAMP",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "batch_id",
+    "type": "STRING",
+    "mode": "REQUIRED"
+  }
+]

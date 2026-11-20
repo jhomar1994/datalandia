@@ -1,13 +1,13 @@
 # P2: procesamiento híbrido de Lumina
 
-La implementación local utiliza las fuentes actuales, las homologaciones simuladas de `data/silver/datalandia_v1` y una fecha simulada del 1 de enero de 2024 en Nueva York. El batch usa DuckDB; el replay continuo usa Spark Structured Streaming. SQLite almacena las observaciones, rechazos y vistas analíticas de la demostración local. No hay servicios de GCP desplegados.
+La implementación local utiliza las fuentes actuales, las homologaciones simuladas de `data/silver/datalandia_v1` y una fecha simulada del 1 de enero de 2024 en Nueva York. El batch usa DuckDB; el replay continuo usa Spark Structured Streaming. SQLite almacena las observaciones, rechazos y vistas analíticas de la demostración local. Esta guía describe solo la ejecución local; la demostración cloud de P2 se documenta en [despliegue_gcp_p2.md](despliegue_gcp_p2.md).
 
 ## Ejecución
 
 Desde la raíz del proyecto, usando el entorno existente:
 
 ```bash
-.venv_bigdata/bin/python notebooks/03_p2_hibrido.py batch
+.venv_bigdata/bin/python pipelines/local/hibrido.py batch
 ```
 
 El batch ya fue ejecutado. El comando protege sus resultados y no sobrescribe `data/p2/silver/batch` si ya existe. Para una ejecución independiente use una copia del proyecto o cambie las rutas de salida. La entrada incluye las referencias y puentes de v1; no está diseñado para ejecutarse sin ellos.
@@ -15,25 +15,25 @@ El batch ya fue ejecutado. El comando protege sus resultados y no sobrescribe `d
 En una terminal, iniciar el streaming y dejarlo activo:
 
 ```bash
-.venv_bigdata/bin/python notebooks/03_p2_hibrido.py serve
+.venv_bigdata/bin/python pipelines/local/hibrido.py serve
 ```
 
 En otra terminal, publicar lecturas de la muestra histórica:
 
 ```bash
-.venv_bigdata/bin/python notebooks/03_p2_hibrido.py publish --limit 1000 --chunk-size 250 --delay 1
+.venv_bigdata/bin/python pipelines/local/hibrido.py publish --limit 1000 --chunk-size 250 --delay 1
 ```
 
 Para publicar datos de prueba con errores intencionales:
 
 ```bash
-.venv_bigdata/bin/python notebooks/03_p2_hibrido.py inject
+.venv_bigdata/bin/python pipelines/local/hibrido.py inject
 ```
 
 Para consultar avance, rechazos y ventanas:
 
 ```bash
-.venv_bigdata/bin/python notebooks/03_p2_hibrido.py status
+.venv_bigdata/bin/python pipelines/local/hibrido.py status
 ```
 
 `serve` no termina automáticamente. Cada archivo JSONL nuevo publicado en `data/p2/stream/input` activa un microbatch. El publicador escribe temporalmente fuera de esa carpeta y mueve el archivo completo de forma atómica. Para detener, use Ctrl+C; al reiniciar se reutilizan el checkpoint y la base. Mantenga juntos `data/p2/stream/checkpoint`, `data/p2/stream/input` y `data/p2/gold/lumina.sqlite`; no reinicie el checkpoint manteniendo la misma base, ya que los números de lote dejarían de identificar la misma ejecución.

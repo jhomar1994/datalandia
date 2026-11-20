@@ -10,13 +10,9 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-# Asegurar que el directorio de trabajo sea la raíz del proyecto (datalandia)
-# Si Jupyter o el script se ejecuta dentro de 'notebooks/', subimos al nivel de 'datalandia/'
-if Path.cwd().name == "notebooks" or not (Path.cwd() / "data").exists():
-    if (Path.cwd().parent / "data").exists():
-        os.chdir(Path.cwd().parent)
-
-BASE_DIR = Path.cwd().resolve()
+# El código vive en pipelines/local; los datos siguen en la raíz del proyecto.
+BASE_DIR = Path(__file__).resolve().parents[2]
+os.chdir(BASE_DIR)
 DATA_DIR = BASE_DIR / "data"
 RAW_DIR = DATA_DIR / "raw"
 SILVER_DIR = DATA_DIR / "silver"
@@ -25,6 +21,8 @@ GOLD_DIR = DATA_DIR / "gold"
 RAW_DIR.mkdir(parents=True, exist_ok=True)
 SILVER_DIR.mkdir(parents=True, exist_ok=True)
 GOLD_DIR.mkdir(parents=True, exist_ok=True)
+for source in ("nyc_tlc", "uber_movement", "array_of_things", "ine"):
+    (RAW_DIR / source).mkdir(parents=True, exist_ok=True)
 
 print(f"Directorio raíz de ejecución: {BASE_DIR}")
 print(f"Ubicación de los datos: {DATA_DIR}")

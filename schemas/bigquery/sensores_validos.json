@@ -1,0 +1,72 @@
+[
+  {
+    "name": "event_id",
+    "type": "STRING",
+    "mode": "REQUIRED"
+  },
+  {
+    "name": "payload_hash",
+    "type": "STRING",
+    "mode": "REQUIRED"
+  },
+  {
+    "name": "node_id",
+    "type": "STRING",
+    "mode": "REQUIRED"
+  },
+  {
+    "name": "zone_id",
+    "type": "STRING",
+    "mode": "REQUIRED"
+  },
+  {
+    "name": "subsystem",
+    "type": "STRING",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "sensor",
+    "type": "STRING",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "parameter",
+    "type": "STRING",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "unit",
+    "type": "STRING",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "value",
+    "type": "FLOAT",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "original_ts",
+    "type": "TIMESTAMP",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "event_ts",
+    "type": "TIMESTAMP",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "published_at",
+    "type": "TIMESTAMP",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "processed_at",
+    "type": "TIMESTAMP",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "out_of_range",
+    "type": "BOOLEAN",
+    "mode": "NULLABLE"
+  }
+]

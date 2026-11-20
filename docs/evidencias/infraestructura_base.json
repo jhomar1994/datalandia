@@ -1,0 +1,91 @@
+{
+  "verified_at_utc": "2026-11-20T08:31:18.400373+00:00",
+  "project": "proyecto-datalandia",
+  "project_number": "637872675138",
+  "region": "us-central1",
+  "checks_passed": [
+    "identidad_proyecto",
+    "apis_requeridas_habilitadas",
+    "bucket_data_proyecto",
+    "bucket_data_region",
+    "bucket_data_acceso_uniforme",
+    "bucket_data_sin_acceso_publico",
+    "bucket_staging_proyecto",
+    "bucket_staging_region",
+    "bucket_staging_acceso_uniforme",
+    "bucket_staging_sin_acceso_publico",
+    "bucket_temp_proyecto",
+    "bucket_temp_region",
+    "bucket_temp_acceso_uniforme",
+    "bucket_temp_sin_acceso_publico",
+    "cuenta_api_habilitada",
+    "cuenta_api_sin_claves_descargables",
+    "cuenta_dataflow_habilitada",
+    "cuenta_dataflow_sin_claves_descargables",
+    "cuenta_publisher_habilitada",
+    "cuenta_publisher_sin_claves_descargables",
+    "cuenta_workflow_habilitada",
+    "cuenta_workflow_sin_claves_descargables",
+    "dataset_region",
+    "dataset_sin_expiracion_automatica",
+    "suscripcion_conectada_al_topic",
+    "retencion_pubsub_un_dia",
+    "subred_private_google_access",
+    "subred_red_correcta",
+    "red_personalizada",
+    "sin_jobs_dataflow_activos",
+    "sin_maquinas_virtuales",
+    "cuota_regional_para_un_worker_dos_vcpu",
+    "cuota_global_para_un_worker_dos_vcpu"
+  ],
+  "quotas": {
+    "regional": {
+      "CPUS": {
+        "limit": 200,
+        "usage": 0,
+        "available": 200
+      },
+      "DISKS_TOTAL_GB": {
+        "limit": 4096,
+        "usage": 0,
+        "available": 4096
+      },
+      "IN_USE_ADDRESSES": {
+        "limit": 8,
+        "usage": 0,
+        "available": 8
+      },
+      "SSD_TOTAL_GB": {
+        "limit": 500,
+        "usage": 0,
+        "available": 500
+      },
+      "INSTANCES": {
+        "limit": 24,
+        "usage": 0,
+        "available": 24
+      }
+    },
+    "global": {
+      "IN_USE_ADDRESSES": {
+        "limit": 8,
+        "usage": 0,
+        "available": 8
+      },
+      "CPUS_ALL_REGIONS": {
+        "limit": 32,
+        "usage": 0,
+        "available": 32
+      }
+    }
+  },
+  "active_dataflow_jobs": 0,
+  "vm_count": 0,
+  "terraform_apply": {
+    "added": 44,
+    "changed": 0,
+    "destroyed": 0
+  },
+  "terraform_postapply_no_changes": true,
+  "dataflow_job_limit": 25
+}

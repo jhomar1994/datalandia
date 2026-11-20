@@ -1,6 +1,6 @@
 """DataLandia: homologación simulada, batch y replay de sensores.
 
-Ejecutar desde la raíz: .venv_bigdata/bin/python notebooks/02_puentes_batch_streaming.py
+Ejecutar desde la raíz: .venv_bigdata/bin/python pipelines/local/puentes_batch_streaming.py
 Las salidas se guardan en directorios nuevos; no se modifican las fuentes raw.
 """
 
@@ -12,7 +12,7 @@ import json
 import duckdb
 from pyspark.sql import SparkSession, functions as F, types as T
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 RAW = ROOT / "data" / "raw"
 SILVER = ROOT / "data" / "silver" / "datalandia_v1"
 GOLD = ROOT / "data" / "gold" / "datalandia_v1"
