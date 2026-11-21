@@ -1,6 +1,9 @@
 # Prueba batch de un millón de viajes en GCP
 
-Estado: procedimiento preparado; esta modificación no ejecuta Dataflow ni acredita resultados nuevos.
+Configuración de la entrega: un millón de viajes reales, dos workers y máximo de treinta minutos.
+Consultar la evidencia fechada de la ejecución para sus resultados; el comando por sí solo no los acredita.
+La ejecución del 21/11/2026 terminó en `DONE`: 937.453 válidos, 62.547 rechazados,
+255 zonas válidas y dos VMs observadas. [Resultados y límites](evidencias/batch_1m.md).
 Objetivo: aumentar el volumen cloud frente a las 10.000 entradas anteriores y observar trabajo
 en dos workers. Un millón de filas por sí solo no acredita escala productiva ni aceptación de la docente.
 
@@ -9,7 +12,7 @@ en dos workers. Un millón de filas por sí solo no acredita escala productiva n
 Con los requisitos de abajo disponibles, toda la secuencia se ejecuta desde la raíz con:
 
 ```bash
-.venv_beam/bin/python scripts/prueba_escala.py
+.venv_beam/bin/python scripts/demo_batch.py --records 1000000 --workers 2 --max-minutes 30
 ```
 
 Este comando genera consumo en GCP. Prepara un millón de viajes (o reutiliza la carpeta
@@ -34,7 +37,8 @@ y el estado Terraform del proyecto `proyecto-datalandia`. La vigilancia depende 
 ```
 
 La carpeta debe ser nueva: el preparador no sobrescribe entradas existentes. Revisar
-`data/p3/escala_1m/manifest.json`: `counts.viajes` debe ser 1.000.000. Los viajes se seleccionan
+`data/p3/escala_1m/manifest.json`: `counts.viajes` debe ser 1.000.000. El comando simplificado
+usa por defecto `data/p3/demo_batch_1000000/`; ambas rutas deben tener su propio manifiesto. Los viajes se seleccionan
 sin prevalidar; no multiplicar filas artificialmente. Datos y manifiesto permanecen fuera de Git.
 
 ## 2. Subida a Storage

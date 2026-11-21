@@ -595,8 +595,8 @@
           porMinuto: { minutos: mins.map(function (m) { return Object.assign({}, m); }) },
           ultimo: ultimo ? Object.assign({ ahora: new Date().toISOString() }, ultimo) : {},
           rechazos: { rechazos: rejs.slice() },
-          batch: { batch_id: 'batch-simulado', estado: 'JOB_STATE_DONE', entradas: 10000, validos: 8459,
-            rechazados: 1541, zonas: 255, consolidado: true, workers_solicitados: 2, actualizado: new Date().toISOString() },
+          batch: { batch_id: 'batch-simulado-1m', estado: 'JOB_STATE_DONE', entradas: 1000000, validos: 937453,
+            rechazados: 62547, zonas: 255, consolidado: true, workers_solicitados: 2, actualizado: new Date().toISOString() },
           errors: [], total: 7
         };
       }

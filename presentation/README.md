@@ -2,6 +2,14 @@
 
 Versión lista para exposición de **15 minutos**, incluidas doce diapositivas y una demo de tres minutos.
 
+La revisión del 21/11/2026 incorpora el batch real de un millón: 937.453 válidos,
+62.547 rechazos, 255 zonas válidas y dos VMs observadas. El rendimiento bruto fue
+3.080,8 entradas/s sobre 324,595 s de duración Dataflow. La evidencia auditable está
+en [batch_1m.json](../docs/evidencias/batch_1m.json). El batch se ejecuta antes de la
+exposición; el bloque en vivo demuestra streaming, con el worker preparado.
+La calculadora usa ahora los escenarios empresariales del informe, incluida la propuesta
+redundante de USD 5.749,79/año; esa arquitectura no está desplegada.
+
 - [PowerPoint editable](output/Lumina_P3_15min.pptx).
 - [PDF de respaldo](output/Lumina_P3_15min.pdf).
 - [Guion y tiempos](guion_ejecutivo_15min.md): notas incluidas también en el PPTX.

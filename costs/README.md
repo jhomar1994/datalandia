@@ -15,7 +15,9 @@ Distribución de planificación: pruebas S/20, demo S/15 y reserva S/15.
 
 ## Control aplicado en la demo
 
-- Dataflow batch: un `n1-standard-1`, disco de 30 GB, sin autoescalado ni IP pública.
+- Dataflow batch de escala: dos `n1-standard-1`, disco de 30 GB por worker, sin autoescalado
+  ni IP pública; un millón de entradas y plazo máximo de treinta minutos. Las pruebas
+  históricas menores usaron uno o dos workers.
 - Streaming: un `n1-standard-2` y Streaming Engine; cierre tras comprobar resultados y límite de doce minutos.
 - Cloud Run: mínimo cero, máximo uno, 0,25 vCPU y 256 MiB; autenticación IAM.
 - Consultas API con máximo de 128 MiB facturables por job y caché breve.

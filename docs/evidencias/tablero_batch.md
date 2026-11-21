@@ -1,5 +1,16 @@
 # Bloque de última ejecución batch
 
+## Resultado principal actualizado: un millón
+
+El 21/11/2026 se ejecutó y consolidó `lumina-p3-scale-20261121050254-fc9795`:
+1.000.000 de entradas, 937.453 válidas, 62.547 rechazos, 255 zonas válidas y dos VMs
+del job observadas. El endpoint `/batch/ultimo` sirve este resultado real.
+La API y los demás endpoints se comprobaron con HTTP 200 conservando el límite de 128 MiB.
+Ver [detalle y reproducción](batch_1m.md) y [consultas y métricas](batch_1m.json).
+
+Las secciones siguientes describen el despliegue inicial y las pruebas anteriores;
+sus conteos de 10.000 no representan la última ejecución.
+
 Despliegue verificado el 20/11/2026 (Lima), revisión Cloud Run `lumina-api-00004-vlb`.
 Imagen: `us-central1-docker.pkg.dev/proyecto-datalandia/lumina-images/lumina-api@sha256:9767b982af89535afa686f149b3e9389e58691a2de8364181e2f828a54f48e9b`.
 Cloud Build: `79b31bf1-686b-42ba-aaf6-8acc0f6957f1`, `SUCCESS`.

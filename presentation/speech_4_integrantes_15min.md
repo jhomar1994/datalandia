@@ -13,7 +13,7 @@ La duración requiere ensayo con cronómetro. El bloque de demo tiene menos text
 
 ## Preparación que no se lee
 
-- Confirmar antes de sustentar que el commit final esté publicado en GitHub. No afirmar que el código local ya está publicado si falta el push.
+- Ejecutar el batch de un millón antes de la exposición y conservar el job DONE, su evidencia y la tarjeta consolidada. Después preparar streaming: el controlador impide jobs simultáneos. Confirmar el commit público utilizado.
 - Seguir `presentation/demo_15min.md`. Al comenzar la exposición, una persona que no está hablando inicia el controlador y publica el warmup. La disponibilidad de ese ID en la API confirma que el worker está preparado antes del minuto 08:30.
 - Mantener listas las pestañas de Dataflow, tablero y Swagger. El consumidor debe estar conectado a la API real, sin `?demo=1`.
 - El integrante 3 dirige la demo. Otra persona puede ejecutar comandos para que no se pierda tiempo escribiendo.
@@ -48,7 +48,7 @@ El alcance de esta implementación comprende el paso del procesamiento local a s
 
 En trazabilidad, organizamos el código de pipelines, SQL, infraestructura y API, con instrucciones de ejecución y evidencias que permiten revisar el resultado más allá de una captura.
 
-En cobertura, ampliamos la validación cloud: la muestra batch produjo viajes válidos en doscientas cincuenta y cinco zonas, y el flujo de sensores cubrió once zonas.
+En volumen y cobertura, procesamos un millón de viajes reales en Dataflow con dos workers observados. Obtuvimos viajes válidos en doscientas cincuenta y cinco zonas; el flujo de sensores cubrió once zonas. El volumen cloud es cien veces el de la prueba inicial.
 
 En operación, incorporamos un controlador con duración máxima y cierre verificable. Un batch que termina correctamente cumple su propósito; el streaming se mantiene activo durante la prueba y luego se cierra por presupuesto. La operación continua con recuperación automática sigue siendo una evolución pendiente.”
 
@@ -58,11 +58,11 @@ En operación, incorporamos un controlador con duración máxima y cierre verifi
 
 “Definimos cuatro criterios de éxito que podemos contrastar con evidencia.
 
-Primero, la contabilidad del lote: de diez mil entradas, ocho mil cuatrocientas cincuenta y nueve fueron válidas y mil quinientas cuarenta y una quedaron rechazadas. Ambas salidas explican el cien por ciento de las entradas. Esto demuestra trazabilidad, aunque existan datos de mala calidad.
+Primero, la conciliación del lote: de un millón de entradas, novecientas treinta y siete mil cuatrocientas cincuenta y tres fueron válidas y sesenta y dos mil quinientas cuarenta y siete quedaron rechazadas. Ambas salidas explican el cien por ciento; también contrastamos los identificadores distintos. El job duró aproximadamente trescientos veinticinco segundos y procesó unas tres mil ochenta entradas por segundo, incluyendo arranque y cargas.
 
-Segundo, la disponibilidad del evento. La meta de demo es hasta sesenta segundos con el worker preparado. En una prueba, un evento estuvo disponible en la API en uno coma treinta y cinco segundos. Es una medición puntual, no un percentil ni una garantía de producción, y excluye el arranque del worker.
+Segundo, la disponibilidad del evento. La meta de demo es hasta sesenta segundos con el worker preparado. En la prueba streaming documentada, un evento estuvo disponible en la API en aproximadamente once segundos. Es una medición puntual, no un percentil ni una garantía de producción, y excluye el arranque del worker.
 
-Tercero, repetir la consolidación serial mediante MERGE no aumentó los viajes canónicos. Cuarto, comprobamos el cierre con cero jobs activos y cero máquinas virtuales.
+Tercero, repetir el MERGE del millón conservó las mismas novecientas treinta y siete mil cuatrocientas cincuenta y tres filas y el mismo importe. Cuarto, comprobamos el cierre con cero jobs activos y cero máquinas virtuales.
 
 A continuación explicamos las decisiones técnicas que sostienen estos resultados.”
 
@@ -90,7 +90,7 @@ Utilizamos viajes TLC de dos mil veinticuatro, sensores AoT de dos mil dieciocho
 
 También diferenciamos el tiempo del evento y el tiempo de procesamiento. El primero permite consultar el escenario histórico; el segundo permite observar actividad que está llegando ahora.
 
-Esta versión depende de conectividad e identidades GCP. La prueba usa un worker y no incluye sensores físicos, forecast ni alta disponibilidad. Hemos probado integración funcional; medir capacidad masiva requiere una prueba de carga adicional.”
+Esta versión depende de conectividad e identidades GCP. El batch utilizó dos workers y streaming uno. El ensayo del millón aporta volumen y cómputo distribuido, pero falta comparar escalamiento y validar fallos. No incluye sensores físicos, forecast ni alta disponibilidad.”
 
 [Cambiar a la arquitectura y señalar primero la ruta batch.]
 
@@ -106,7 +106,7 @@ Silver conserva las recepciones para trazabilidad. Gold deduplica los eventos y 
 
 La API consulta esos resultados y alimenta el tablero. Aunque accedemos mediante un proxy en la laptop, el backend está desplegado en Cloud Run y consulta BigQuery con su cuenta de servicio.
 
-Para esta demo limitamos cada job a un worker, usamos discos de treinta gigabytes y evitamos IP públicas. Cloud Run escala entre cero y una instancia. Estos recursos y sus tiempos de uso forman la base de nuestra estimación.”
+Para el batch usamos dos workers de una vCPU cada uno; para streaming, uno de dos vCPU. Cada worker usa disco de treinta gigabytes y carece de IP pública. Cloud Run escala entre cero y una instancia. Estos recursos y sus tiempos de uso forman la base de nuestra estimación.”
 
 [Recorrer las dos rutas, BigQuery y el consumidor. Cambiar a la diapositiva 8.]
 
@@ -116,9 +116,11 @@ Para esta demo limitamos cada job a un worker, usamos discos de treinta gigabyte
 
 El presupuesto acordado para pruebas y demo es de cincuenta soles. El gasto facturado debe contrastarse con Cloud Billing y no lo presentamos como cero ni como una cifra ya verificada.
 
-Para el primer año construimos dos escenarios. Bajo demanda, con diez horas mensuales de streaming, el modelo estima aproximadamente ciento sesenta y cinco dólares anuales. Con streaming continuo, modelando setecientas treinta horas mensuales, estima aproximadamente cuatro mil treinta y siete dólares anuales.
+Para el primer año modelamos una empresa con quinientos sensores, un evento cada quince segundos y veinte mil viajes diarios. El millón de nuestra prueba es un ensayo puntual, no el supuesto diario del negocio.
 
-Ambos consideran diez horas mensuales de batch, consultas, almacenamiento y tráfico. Incorporan reservas para otros servicios y treinta por ciento de contingencia. El consumo de Streaming Engine todavía necesita calibración, por lo que estas cifras son preliminares.
+Con un job streaming continuo y archivo regional estimamos tres mil cuatrocientos treinta y seis dólares anuales. La propuesta con redundancia considera dos jobs en zonas distintas, dos suscripciones independientes y archivo replicado en dos regiones: cinco mil setecientos cincuenta dólares anuales, aproximadamente.
+
+Incluye veinticinco por ciento de contingencia y usa las tarifas de referencia de us-central1. No aplica impuestos, descuentos ni créditos. La redundancia está presupuestada; todavía requiere desplegarse y probarse. El gasto real debe revisarse en Billing.
 
 La principal decisión de costo es cuánto tiempo mantenemos el streaming encendido. Por eso operamos bajo demanda y verificamos el cierre. Esta configuración tampoco demuestra que un worker pueda sostener cualquier carga: el dimensionamiento requiere mediciones adicionales.
 
@@ -170,11 +172,11 @@ Solicitamos el cierre mediante drain para completar el trabajo en tránsito. Mie
 
 “Además de la demostración, conservamos resultados de pruebas documentadas.
 
-El batch procesó diez mil entradas. En otra ejecución streaming publicamos doscientos cincuenta y siete mensajes, incluyendo replay, controles e inválidos. Esa cifra no representa doscientas cincuenta y siete lecturas únicas nuevas, porque parte del replay ya existía.
+El batch procesó un millón de entradas y concilió válidos y rechazos. Guardamos el identificador del job, los tiempos y la evidencia de dos VMs realmente creadas. En la prueba streaming publicamos doscientos ochenta y siete mensajes, incluidos sesenta nuevos. El total incluye replay, controles e inválidos y no equivale a lecturas únicas nuevas.
 
-En la ráfaga visible observamos que las aceptadas pasaron de ciento ochenta y cinco a doscientas quince. También verificamos el cambio de la tarjeta y las barras de aceptadas y rechazadas.
+En streaming verificamos el último identificador de la ráfaga y las barras de aceptadas y rechazadas. La tarjeta batch muestra por separado el millón procesado; no mezclamos los conteos de ambos flujos.
 
-Completamos dieciocho pruebas de contratos y API, además de dos integraciones SQL en BigQuery. Probamos que un duplicado no se sume dos veces en Gold y que un identificador con contenidos conflictivos quede excluido de los agregados.”
+Registramos veintiuna pruebas de API y contratos y nueve de controladores, además de integraciones SQL en BigQuery y del reproceso real del millón. Probamos que un duplicado no se sume dos veces en Gold y que un identificador con contenidos conflictivos quede excluido de los agregados.”
 
 [Señalar las evidencias y cambiar a la diapositiva 11.]
 
@@ -186,7 +188,7 @@ La segunda es que la calidad de los agregados depende de decisiones explícitas 
 
 La tercera es que el control del consumo debe incorporarse a la operación. Encender recursos para demostrar el caso y cerrarlos después es adecuado para este prototipo.
 
-El siguiente paso hacia producción exige probar volumen, concurrencia, continuidad y recuperación. La muestra demuestra factibilidad técnica, pero todavía no permite prometer capacidad masiva ni un nivel de servicio.”
+El millón amplía la evidencia de volumen, pero una ejecución no prueba escalamiento lineal ni un nivel de servicio. Para producción faltan cargas representativas, concurrencia, continuidad y recuperación.”
 
 [Cambiar a la diapositiva 12. Otra persona comprueba el cierre en GCP.]
 
@@ -194,9 +196,9 @@ El siguiente paso hacia producción exige probar volumen, concurrencia, continui
 
 “Nuestras siguientes acciones tienen tres prioridades.
 
-Primero, cerrar la trazabilidad del entregable: el código y sus instrucciones deben quedar asociados a un commit final verificable en GitHub, junto con las evidencias de las ejecuciones. Eso permite auditar y repetir el proyecto desde el repositorio.
+Primero, mantener la trazabilidad por versión y ejecución y automatizar las pruebas y los despliegues. El código público, sus instrucciones y la evidencia del millón permiten auditar esta entrega.
 
-Segundo, ampliar la validación: procesar el archivo completo, medir carga y concurrencia, revisar las particiones según las consultas reales y definir retención. Con esas mediciones podremos ajustar la estimación de consumo y el dimensionamiento.
+Segundo, ampliar la validación: comparar el mismo lote con uno y dos workers, medir concurrencia, revisar las particiones según las consultas reales y definir retención. Con esas mediciones podremos ajustar la estimación de consumo y el dimensionamiento.
 
 Tercero, fortalecer la operación con alertas, recuperación, automatización del ciclo de vida y un estado Terraform compartido. También queremos integrar de forma más sencilla la preparación, publicación y cierre de la demo.
 

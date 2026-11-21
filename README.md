@@ -66,9 +66,15 @@ las pruebas. Ese resultado histórico no implica que hoy exista un job activo.
 
 ## Demo final P3
 
-Los siguientes conteos describen la prueba inicial. Las repeticiones añaden eventos; la actualización del tablero está documentada en [evidencias de monitoreo](docs/evidencias/actualizacion_tablero.md).
+La prueba batch principal se amplió el 21/11/2026 (Lima) a un millón de viajes reales.
+La [evidencia de escala](docs/evidencias/batch_1m.json) registra consultas, tiempos y recursos.
+Las pruebas iniciales se conservan como antecedentes fechados.
 
-- Batch real de 10.000 registros: 8.459 viajes válidos, 1.541 rechazos y 255 zonas válidas de origen.
+- Batch real de **1.000.000** de entradas: **937.453 válidas**, **62.547 rechazadas**,
+  **255 zonas válidas** y dos workers `n1-standard-1` observados. Estado `DONE` y consolidado.
+- Duración del job: 324,595 s; rendimiento bruto 3.080,8 entradas/s, incluyendo arranque y
+  cargas BigQuery. Controlador: 352 s. Una ejecución no demuestra escalamiento lineal.
+- Repetir el MERGE conservó 937.453 viajes y USD 24.490.375,32; cero filas nuevas.
 - Streaming de 225 mensajes: 184 recepciones válidas, 41 rechazos, once zonas y 181 eventos únicos en Gold.
 - Evento de control disponible en la API en aproximadamente doce segundos con el worker listo; medición de un caso, no un SLA.
 - Duplicados y conflictos comprobados; quince pruebas unitarias/HTTP y dos integraciones SQL en BigQuery aprobadas.
@@ -84,6 +90,15 @@ Abrir `http://127.0.0.1:8080`. Para la demo en vivo, en otra terminal:
 ```bash
 .venv_beam/bin/python scripts/demo_e2e.py --visible-seconds 30
 ```
+
+Para reproducir el batch de escala, antes de iniciar streaming:
+
+```bash
+.venv_beam/bin/python scripts/demo_batch.py --records 1000000 --workers 2 --max-minutes 30
+```
+
+El tablero muestra su resumen en «Última ejecución batch». Los rechazos recientes de la
+API incluyen ambos flujos; no compararlos con los conteos exclusivos de un batch.
 
 Consultar [guion y apagado](demo/README.md), [API](api/README.md),
 [evidencias](docs/evidencias/demo_final.json), [observaciones P2](docs/revision_observaciones_p2.md),

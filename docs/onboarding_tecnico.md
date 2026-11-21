@@ -74,12 +74,15 @@ El recorrido de preparación es el siguiente:
    los sube a `gs://proyecto-datalandia-637872675138-data/p3/inputs/<bundle_id>/`.
    Las rutas efectivas se registran en `referencias_locales/p3_staging.json`.
 
-La muestra P3 preparada contiene **100.000 viajes sin prevalidar**, 11.000 lecturas históricas,
+La muestra principal P3 contiene **1.000.000 de viajes sin prevalidar**, 11.000 lecturas históricas,
 once nodos/zonas de sensores, 2.694 asociaciones batch, once asociaciones de nodos,
 263 referencias de zonas y 193 definiciones de sensores. La selección de viajes equilibra
 cobertura entre zonas; su tasa de rechazo no estima la del archivo completo.
-En Dataflow se ejecutaron 10.000 viajes para limitar el gasto. Preparar 100.000 no significa
-haber procesado esos 100.000 en GCP. Ver [volúmenes y resultados](pipelines_p3.md).
+El 21/11/2026 se ejecutó el millón completo en Dataflow con dos workers observados:
+937.453 válidos, 62.547 rechazos, 255 zonas válidas y `DONE`. El job duró 324,595 s;
+la conciliación y el reproceso serial se verificaron. La prueba anterior de 10.000 se
+conserva como antecedente. Ver [evidencia actual](evidencias/batch_1m.md) y
+[volúmenes históricos](pipelines_p3.md).
 
 La homologación territorial conserva la identidad TLC mediante códigos `DL-001` a `DL-263`.
 El puente batch asigna comunas del Censo por rango de población frente a demanda de viajes,
@@ -338,8 +341,8 @@ Cada fila corresponde a una prueba distinta. No sumar los conteos como si fueran
 | Prueba documentada | Resultado | Evidencia |
 |---|---|---|
 | DirectRunner batch local P3 | 100.000 entradas: 86.368 válidas y 13.632 rechazadas. | [Pipelines P3](pipelines_p3.md) |
-| Batch real Dataflow | 10.000 entradas: 8.459 válidas, 1.541 rechazadas, 255 zonas válidas de origen; job `DONE`. | [demo_final.json](evidencias/demo_final.json) |
-| Reintento de consolidación | Dos MERGE seriales mantuvieron 8.459 viajes y su importe. | [demo_final.json](evidencias/demo_final.json) |
+| Batch real Dataflow principal | 1.000.000 entradas: 937.453 válidas, 62.547 rechazadas, 255 zonas válidas; dos VMs observadas, `DONE`, 324,595 s. | [batch_1m.json](evidencias/batch_1m.json) |
+| Reintento de consolidación principal | Repetir MERGE conservó 937.453 viajes y USD 24.490.375,32. | [batch_1m.json](evidencias/batch_1m.json) |
 | Streaming inicial | 225 mensajes: 184 copias válidas, 182 IDs, 41 rechazos, once zonas; Gold conserva 181 IDs al excluir el conflicto. | [demo_final.json](evidencias/demo_final.json) |
 | Tablero actualizado | 257 mensajes publicados, incluidos treinta IDs nuevos y dos fixtures inválidos; aceptadas pasó de 185 a 215; se vieron barras azules/naranjas y cambio del último evento. | [actualizacion_tablero.json](evidencias/actualizacion_tablero.json) |
 | Disponibilidad de un evento con worker listo | 1,35 segundos en la prueba del tablero; no es p95, SLA ni incluye arranque. | [actualizacion_tablero.md](evidencias/actualizacion_tablero.md) |

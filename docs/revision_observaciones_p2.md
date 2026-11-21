@@ -7,8 +7,8 @@ una captura no permite auditar transformaciones. Tener un repositorio no demuest
 
 Repositorio identificado: https://github.com/jhomar1994/datalandia, público al verificarlo.
 Se organizaron pipelines, contratos, SQL, Terraform, API, consumidor, pruebas y guion.
-Antes de entregar, publicar los cambios y colocar en slides e informe el enlace a un commit concreto.
-Los cambios locales todavía no equivalen a código publicado. Datos y archivos privados están excluidos.
+La entrega se publica en `feat/p3-entrega-final`; el informe identifica el commit exacto auditado.
+Datos y archivos privados están excluidos. Las evidencias pequeñas de resultados se versionan.
 El README documenta las fuentes y el preparador genera un manifiesto con hashes.
 
 ## 2. Tamaño y cobertura
@@ -16,10 +16,16 @@ El README documenta las fuentes y el preparador genera un manifiesto con hashes.
 Tiene sentido cuestionar una sola zona para sustentar un escenario masivo. Distinguir volumen de las fuentes,
 procesamiento local y volumen realmente ejecutado en Dataflow.
 
-P3 preparó 100.000 viajes y once nodos. Para limitar costos se probaron 10.000 viajes en Dataflow:
-8.459 válidos, 1.541 rechazados y 255 zonas de origen válidas. Un worker real acredita la ejecución
-cloud, pero no escalabilidad horizontal ni rendimiento a gran volumen. El exportador admite el archivo
-completo; la prueba de carga requiere presupuesto separado. Las asociaciones entre territorios son simuladas.
+La prueba principal del 21/11/2026 procesó **1.000.000 de viajes reales en Dataflow**:
+937.453 válidos, 62.547 rechazados y 255 zonas válidas de origen. Se observaron dos VMs
+`n1-standard-1` del job. Duró 324,595 s (3.080,8 entradas/s brutas, con arranque y cargas).
+El controlador registró 352 s y verificó cero jobs/VMs al cierre. La entrada tenía 260 códigos
+de origen; la diferencia de cobertura responde a validación. Ver [evidencia](evidencias/batch_1m.json).
+
+Frente a las 10.000 entradas anteriores, se probó cien veces el volumen. La observación de
+muestra reducida se mitiga con evidencia de mayor volumen y recursos distribuidos; faltan
+comparaciones controladas de uno/dos workers, cargas representativas y objetivos de servicio
+para acreditar escalabilidad productiva. Las asociaciones entre territorios siguen simuladas.
 
 ## 3. Jobs detenidos y continuidad
 

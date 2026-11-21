@@ -10,15 +10,16 @@ Ejecutar desde la raíz, primero batch y, cuando haya terminado y cerrado sus wo
 Los comandos inician recursos GCP y generan consumo; mantener la laptop activa.
 
 ```bash
-.venv_beam/bin/python scripts/demo_batch.py --records 10000
+.venv_beam/bin/python scripts/demo_batch.py --records 1000000 --workers 2 --max-minutes 30
 ```
 
 `demo_batch.py` selecciona viajes TLC reales sin prevalidar, prepara una carpeta por volumen,
-sube el bundle y ejecuta dos workers por defecto, con límite de quince minutos. Consolida
+sube el bundle y ejecuta dos workers por defecto, con límite de treinta minutos. Consolida
 solo tras `DONE` y comprueba ausencia de jobs/VMs. Cambiar `--records` para otra cantidad,
-`--workers 1` para reducir cómputo o `--max-minutes 30` para un lote mayor.
+`--workers 1` para reducir cómputo o `--max-minutes` para ajustar el plazo.
 Repetir las mismas filas mantiene sus IDs: el MERGE puede no añadir viajes nuevos.
-Los 10.000 son entradas procesadas; los aceptados pueden ser menos.
+El millón representa entradas procesadas; los aceptados pueden ser menos. Para una prueba
+rápida se conserva `--records 10000`; no confundirla con la prueba de escala.
 El bloque «Última ejecución batch» del tablero muestra el estado y conteos de ese job.
 Para verlo, mantener el proxy y la página abiertos también durante batch. El controlador
 registra estados y calcula conteos tras `DONE`; la marca consolidado aparece tras el MERGE.
@@ -46,8 +47,11 @@ la ráfaga. No ejecutar ambas demos en paralelo.
 
 ## Batch
 
-La prueba realizada procesó 10.000 registros y terminó en `JOB_STATE_DONE`.
-El URI de la muestra está en `docs/evidencias/demo_final.json`.
+La prueba principal procesó **1.000.000 de registros** el 21/11/2026 y terminó en
+`JOB_STATE_DONE`: 937.453 válidos, 62.547 rechazos y 255 zonas válidas. Se observaron
+dos VMs del job; duración Dataflow 324,595 s y controlador 352 s. El reproceso serial
+no añadió filas. [Resultado auditable](../docs/evidencias/batch_1m.json).
+La prueba histórica de 10.000 está en `docs/evidencias/demo_final.json` y no se reescribe.
 
 ```bash
 .venv_beam/bin/python scripts/run_dataflow.py --mode batch --input gs://BUCKET/RUTA/viajes.jsonl --max-minutes 12
@@ -105,6 +109,12 @@ Ambas listas deben quedar vacías. Ante una interrupción, identificar el job de
 Detener el proxy con Ctrl+C y cerrar el tablero. Se conservan datos e imagen para relanzar mañana.
 
 Esta prueba acredita integración funcional; la capacidad masiva, operación 24/7 y SLA quedan pendientes.
+
+La prueba batch de un millón aporta evidencia de mayor volumen en dos workers; no permite
+prometer escalamiento lineal ni servicio continuo. Para la exposición, ejecutar el batch antes
+del bloque en vivo y mostrar su resultado consolidado. Si se quiere distinguir visualmente
+la ráfaga streaming, considerar que el gráfico incluye rechazos batch en los últimos quince
+minutos; esos rechazos pueden dominar la escala de las barras mientras sigan en el horizonte.
 
 
 El HTML nuevo actualiza seis endpoints cada cinco segundos. Pausar con el botón del tablero para evitar

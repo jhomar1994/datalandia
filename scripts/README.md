@@ -22,7 +22,8 @@ corresponde a la pausa antes o después del procesamiento, no al estado esperado
 
 Operación implementada:
 
-- `demo_batch.py --records 10000`: demo batch independiente, con volumen configurable y dos workers por defecto.
+- `demo_batch.py --records 1000000`: demo batch independiente, con un millón de entradas,
+  dos workers y treinta minutos de plazo por defecto. `--records 10000` conserva la prueba rápida.
 - `demo_streaming.py --events 60 --rate 1`: demo streaming con cantidad/frecuencia configurables, controles y cierre. Requiere proxy de Cloud Run.
 - `prueba_escala.py`: comando único para preparar, subir y ejecutar el batch de un millón de viajes con dos workers; consolida tras `DONE` y verifica cierre. Genera consumo GCP.
 - `run_dataflow.py`: workers privados, vigilancia y cierre; requiere entorno Beam. Por defecto un worker y doce minutos. Batch admite `--workers 1..3` y hasta 45 minutos; streaming conserva un worker y hasta quince minutos.

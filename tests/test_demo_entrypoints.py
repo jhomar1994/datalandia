@@ -11,9 +11,9 @@ class DemoEntrypointsTests(unittest.TestCase):
     def test_batch_defaults_and_volume_forwarded(self):
         with patch.object(demo_batch, "execute") as execute:
             demo_batch.main([])
-            self.assertEqual(execute.call_args.args[1:], (10000, 2, 15))
+            self.assertEqual(execute.call_args.args[1:], (1000000, 2, 30))
             demo_batch.main(["--records", "25000", "--workers", "1"])
-            self.assertEqual(execute.call_args.args[1:], (25000, 1, 15))
+            self.assertEqual(execute.call_args.args[1:], (25000, 1, 30))
             self.assertEqual(execute.call_args.args[0].name, "demo_batch_25000")
 
     def test_streaming_volume_and_rate_forwarded(self):

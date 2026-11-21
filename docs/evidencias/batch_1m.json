@@ -1,0 +1,123 @@
+{
+  "verified_at_utc": "2026-11-21T05:11:56.131162+00:00",
+  "project": "proyecto-datalandia",
+  "region": "us-central1",
+  "job_name": "lumina-p3-scale-20261121050254-fc9795",
+  "job_id": "2026-11-20_21_03_47-1124113057153420567",
+  "state": "JOB_STATE_DONE",
+  "input_records": 1000000,
+  "input_bytes": 229713293,
+  "input_origin_codes": 260,
+  "bundle_id": "4ad4e87bd7b427c388ed2697165db712481a4a00a70906b34ce6f3ec8c2d447c",
+  "counts": {
+    "staged_rows": 937453,
+    "accepted": 937453,
+    "valid_origin_zones": 255,
+    "rejected_rows": 62547,
+    "rejected": 62547
+  },
+  "rejection_reasons": [
+    {
+      "reason": "distancia_invalida",
+      "records": 34220
+    },
+    {
+      "reason": "zona_invalida_origin_id",
+      "records": 12018
+    },
+    {
+      "reason": "importe_invalido",
+      "records": 9874
+    },
+    {
+      "reason": "zona_invalida_destination_id",
+      "records": 5684
+    },
+    {
+      "reason": "duracion_invalida",
+      "records": 739
+    },
+    {
+      "reason": "fecha_fuera_periodo",
+      "records": 12
+    }
+  ],
+  "workers": {
+    "requested": 2,
+    "observed_running": 2,
+    "machine_type": "n1-standard-1",
+    "disk_gb_each": 30,
+    "private_ip": true,
+    "zone": "us-central1-f",
+    "names": [
+      "lumina-p3-scale-202611210-11202103-grr3-harness-gjt0",
+      "lumina-p3-scale-202611210-11202103-grr3-harness-h9kw"
+    ]
+  },
+  "timing": {
+    "start_time": "2026-11-21T05:03:48.442220Z",
+    "end_time": "2026-11-21T05:09:13.037372Z",
+    "job_seconds": 324.595,
+    "controller_seconds": 352,
+    "running_observed_seconds": 311,
+    "throughput_job_records_s": 3080.761,
+    "throughput_controller_records_s": 2840.909,
+    "throughput_running_observed_records_s": 3215.434
+  },
+  "resource_metrics": {
+    "TotalVcpuTime": 487,
+    "TotalMemoryUsage": 1870244,
+    "TotalPdUsage": 14611
+  },
+  "reprocess": {
+    "before": {
+      "trips": 937453,
+      "total_usd": 24490375.32
+    },
+    "after": {
+      "trips": 937453,
+      "total_usd": 24490375.32
+    },
+    "delta_rows": 0,
+    "merge_job_id": "d0ce5a7c-3950-487a-b8c5-d227517b7351",
+    "bytes_processed": 754874978
+  },
+  "shutdown": {
+    "active_jobs_in_region": 0,
+    "vms_in_project": 0
+  },
+  "queries": [
+    {
+      "job_id": "56fd02b9-a016-4616-aab8-8ddd5c31fe62",
+      "sql": "SELECT COUNT(*) staged_rows,COUNT(DISTINCT trip_id) accepted,\nCOUNT(DISTINCT origin_id) valid_origin_zones FROM `proyecto-datalandia.lumina_demo.viajes_staging`\nWHERE batch_id=@batch_id",
+      "bytes_processed": 105932189
+    },
+    {
+      "job_id": "bc8bb399-7f33-4aeb-92e7-f596a6c76766",
+      "sql": "SELECT COUNT(*) rejected_rows,COUNT(DISTINCT rejection_id) rejected\nFROM `proyecto-datalandia.lumina_demo.rechazados_raw` WHERE source='viaje' AND batch_id=@batch_id",
+      "bytes_processed": 7005264
+    },
+    {
+      "job_id": "21814b81-2683-4d38-b158-aac48e700a01",
+      "sql": "SELECT reason,COUNT(*) records FROM `proyecto-datalandia.lumina_demo.rechazados_raw`\nWHERE source='viaje' AND batch_id=@batch_id GROUP BY reason ORDER BY records DESC",
+      "bytes_processed": 4224557
+    },
+    {
+      "job_id": "d5613781-2065-474f-ad4a-9d38032d8173",
+      "sql": "SELECT COUNT(*) trips,ROUND(SUM(total_usd),2) total_usd FROM `proyecto-datalandia.lumina_demo.viajes_validos`",
+      "bytes_processed": 7499624
+    },
+    {
+      "job_id": "767b0262-118a-4d6c-9af9-e1b79fa6d34d",
+      "sql": "SELECT COUNT(*) trips,ROUND(SUM(total_usd),2) total_usd FROM `proyecto-datalandia.lumina_demo.viajes_validos`",
+      "bytes_processed": 7499624
+    }
+  ],
+  "actual_billing": "NO VERIFICADO",
+  "limits": [
+    "Una ejecución de un millón; no demuestra escalamiento lineal ni capacidad de producción.",
+    "RUNNING es tiempo observado por sondeo; incluye etapas de lectura y cargas BigQuery.",
+    "Dos workers observados en una zona; no son redundancia zonal.",
+    "El throughput bruto incluye arranque y cargas; no representa solo transformación de CPU."
+  ]
+}

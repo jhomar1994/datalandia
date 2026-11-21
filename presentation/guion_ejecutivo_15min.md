@@ -17,15 +17,15 @@ Fuentes: README.md; docs/pipelines_p3.md; api/README.md.
 
 ## 3. Situación actual (01:30–02:30)
 
-Responder a cada observación sin exagerar. La trazabilidad mejora con código, contratos, guías y evidencias. El repositorio público existe, pero el commit final debe publicarse antes de entregar. La prueba batch real usó 10.000 entradas y produjo viajes válidos en 255 zonas. Los sensores cubren once zonas. Un batch DONE es correcto; detener streaming después de una prueba es control de costos, pero no operación 24/7.
+La entrega pública incluye código, contratos, SQL, Terraform y guías. La prueba principal procesó 1.000.000 entradas reales y produjo 937.453 válidas y 62.547 rechazos en 255 zonas, con dos VMs observadas. La fuente abarca 260 códigos de origen; los inválidos explican la menor cobertura válida. El streaming abarca once zonas. Se mitiga la muestra reducida con cien veces más volumen cloud; todavía faltan comparaciones controladas de escalamiento y recuperación 24/7.
 
-Fuentes: docs/revision_observaciones_p2.md; docs/evidencias/demo_final.json; docs/evidencias/actualizacion_tablero.json.
+Fuentes: docs/evidencias/batch_1m.json; docs/revision_observaciones_p2.md.
 
 ## 4. KPI (02:30–03:45)
 
-Contabilidad: (8.459 + 1.541) / 10.000 = 100%. La tasa de aceptación 84,59% es un resultado de muestra, no una meta. La disponibilidad 1,35 s corresponde a un único evento con worker ya listo en el job lumina-p3-stream-20261120110633. No confundir con el KPI promedio del tablero ni incluirlo como percentil. La repetición serial del MERGE mantiene 8.459 viajes. El cierre verificado quedó en cero jobs y VMs. Las metas son de demo y no un SLA contractual.
+Conciliación: (937.453 + 62.547) / 1.000.000 = 100%. Se contrastaron IDs distintos y filas físicas. La duración Dataflow fue 324,595 s; el controlador, 352 s. El rendimiento bruto 3080,8 entradas/s incluye arranque y cargas BigQuery, excluyendo MERGE posterior. Repetir MERGE conservó 937.453 viajes y USD 24.490.375,32. El evento streaming de control del 20/11 tardó 11,006 s con worker preparado; no es p95 ni SLA. Se comprobó cero jobs/VMs al cierre.
 
-Fuentes: docs/evidencias/demo_final.json; docs/evidencias/actualizacion_tablero.json; tests/test_bigquery_merge.py.
+Fuentes: docs/evidencias/batch_1m.json; informe final, evidencia streaming del 20/11/2026.
 
 ## 5. Tecnologías (03:45–04:30)
 
@@ -47,9 +47,9 @@ Fuentes: infra/terraform/; sql/bigquery/; api/README.md; costs/calculator.py.
 
 ## 8. Calculadora (07:00–08:30)
 
-Estimación de planificación, no cotización ni factura. El escenario bajo demanda reserva diez horas mensuales de streaming y diez de batch. El continuo modela 730 horas de streaming con el mismo worker, sin garantizar capacidad o SLA. Ambos asumen 0,1 TiB de consultas, 10 GiB medios BigQuery, 2 GiB Pub/Sub, dos SECU por hora de streaming como supuesto NO VERIFICADO, reservas por discos, Storage, inserts, Cloud Run, build, imágenes y logging. El modelo aplica 30% de contingencia. Los importes anuales se calculan antes de redondear mensual, por eso pueden diferir unos centavos de 12 por el mensual mostrado. El tipo de cambio de S/4 por USD del archivo es supuesto, no cotización. La retención debe revisarse para sostener almacenamiento medio. El gasto real de Cloud Billing sigue NO VERIFICADO. No afirmar que S/50 cubre operación anual.
+La proyección empresarial usa 500 sensores con un evento de 1 KiB cada quince segundos, veinte mil viajes diarios y batch de dos workers durante treinta minutos al día. El millón de esta prueba es una carga puntual y no reemplaza ese supuesto diario. El escenario con un job streaming 24/7 y archivo regional estima USD 3.436,16 al año. La propuesta redundante tiene dos jobs en zonas distintas, dos suscripciones y archivo nam4; estima USD 5.749,79 al año, incluida contingencia del 25%. No está desplegada. No se promete recuperación regional completa. Sin impuestos, créditos ni descuentos. La factura real sigue NO VERIFICADO.
 
-Fuentes: costs/calculator.py; costs/estimate.json; costs/README.md. Tarifas consultadas 20/11/2026: https://cloud.google.com/dataflow/pricing ; https://cloud.google.com/bigquery/pricing ; https://cloud.google.com/pubsub/pricing ; https://cloud.google.com/run/pricing .
+Fuentes: costs/enterprise_estimate.json; costs/primer_ano_redundancia.md; tarifas oficiales enlazadas en esos archivos.
 
 ## 9. Demo en vivo (08:30–11:30)
 
@@ -59,18 +59,18 @@ Fuentes: demo/README.md; scripts/run_dataflow.py; pipelines/cloud/publicar_event
 
 ## 10. Evidencias (11:30–12:30)
 
-Las cifras pertenecen a ejecuciones documentadas y no deben compararse como si fueran una sola carga. Batch: 10.000 entradas y 255 zonas de origen válidas. Streaming: 257 mensajes incluyen 220 de replay, cinco controles, treinta eventos nuevos y dos fixtures inválidos. Muchos IDs históricos ya existían: no son 257 nuevas lecturas únicas. Durante la ráfaga el KPI pasó de 185 a 215. Dieciocho pruebas de API y contratos, más dos integraciones SQL de BigQuery documentadas aparte. Se revisó visualmente el modo real y el simulado en Chrome. El cierre quedó DRAINED y cero workers/VMs en el corte observado.
+Batch principal: 1.000.000 entradas, 937.453 válidas, 62.547 rechazos, 255 zonas, dos VMs observadas y DONE. Los conteos están filtrados por batch_id. Streaming del 20/11: 287 mensajes incluyen 220 de replay, cinco controles, sesenta eventos nuevos y dos fixtures inválidos; no son 287 lecturas únicas nuevas. Se confirmó el último ID y las barras de aceptadas/rechazadas. Hay veintiuna pruebas de API/contratos y nueve de controladores registradas, además de integraciones SQL reales. El reproceso del millón volvió a comprobarse en BigQuery sin filas nuevas.
 
-Fuentes: docs/evidencias/demo_final.json; docs/evidencias/actualizacion_tablero.json; tests/README.md.
+Fuentes: docs/evidencias/batch_1m.json; docs/evidencias/tablero_batch.md; tests/README.md.
 
 ## 11. Conclusiones (12:30–13:30)
 
-Cerrar el argumento: se logró la exposición y el consumidor con una ruta real de extremo a extremo. La calidad y la idempotencia son decisiones centrales para confiar en los agregados. El presupuesto condicionó una prueba funcional de un worker. Detener el cómputo después de demostrarlo es una decisión operativa defendible, pero no reemplaza observabilidad y recuperación en producción. No prometer ahorros, SLA ni horizontalidad no medidos.
+Se conectaron ingesta, procesamiento en GCP y consumidor. La calidad y la idempotencia permiten auditar el resultado. La evidencia batch amplía el volumen a un millón con dos workers y mediciones explícitas. Esto no permite afirmar escalamiento lineal ni capacidad productiva garantizada. La ejecución bajo demanda y el cierre acotan consumo; la operación continua y la recuperación automática siguen pendientes.
 
-Fuentes: docs/evidencias/actualizacion_tablero.json; docs/revision_observaciones_p2.md.
+Fuentes: docs/evidencias/batch_1m.json; docs/revision_observaciones_p2.md.
 
 ## 12. Next steps (13:30–15:00)
 
-Primero cerrar el entregable, sin afirmar que el código local ya está publicado. Compartir el enlace al commit final cuando se haga push. Distribuir la exposición entre los cuatro integrantes y confirmar aportes reales: no inventar autorías ni responsabilidades. La separación preparar/publicar/cerrar es una mejora pendiente del controlador integrado. Para producción hacen falta capacidad, retención por processed_at, alertas, recuperación automática y backend de estado compartido. Retomar el presupuesto y una cotización con mediciones. Finalizar comprobando que Dataflow y las VMs quedaron en cero.
+La siguiente etapa consiste en validar cargas representativas y comparar el mismo lote con uno y dos workers; definir retención y objetivos de servicio; implementar orquestación administrada, alertas, recuperación y CI/CD. Mantener trazabilidad por commit y evidencia de cada ejecución. La propuesta redundante del presupuesto requiere implementación y pruebas de fallos. Cerrar comprobando jobs y VMs, y confirmar las contribuciones individuales con el equipo.
 
-Fuentes: README.md; docs/revision_observaciones_p2.md; costs/README.md; https://github.com/jhomar1994/datalandia.
+Fuentes: docs/evidencias/batch_1m.json; costs/primer_ano_redundancia.md; docs/revision_observaciones_p2.md.

@@ -10,7 +10,8 @@
 - [Presupuesto](../costs/README.md): presupuesto de pruebas y calculadora anual preliminar.
 - [Demo](../demo/README.md): recorrido funcional probado y apagado.
 - [Pipelines P3](pipelines_p3.md): adaptación, pruebas y estado del procesamiento.
-- [Prueba cloud de un millón de viajes](prueba_escala_cloud.md): preparación y ejecución con dos workers; pendiente de ejecutar.
+- [Prueba cloud de un millón de viajes](prueba_escala_cloud.md): ejecutada con dos workers,
+  `DONE`, 937.453 válidos y 62.547 rechazados; [evidencia auditable](evidencias/batch_1m.md).
 - [Sustentación](../presentation/README.md): presentación ejecutiva, guion, speech para cuatro integrantes y preparación de demo.
 
 Guardar capturas y resultados publicables en `evidencias/` sin credenciales ni datos personales.

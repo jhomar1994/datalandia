@@ -91,6 +91,11 @@ Autenticación ADC local y cuenta de servicio en Cloud Run. No descargar llaves 
 
 ## Acceso y prueba
 
+El batch principal de la entrega procesó un millón de viajes; `/batch/ultimo` devuelve
+1.000.000 entradas, 937.453 válidos, 62.547 rechazos y 255 zonas válidas, con `DONE`
+y consolidación completada. No son valores fijos de la API: provienen del registro BigQuery.
+El modo `?demo=1` usa un ejemplo separado identificado como simulado y no consulta GCP.
+
 ```bash
 gcloud run services proxy lumina-api --project=proyecto-datalandia --region=us-central1 --port=8080
 curl 'http://127.0.0.1:8080/eventos/por-minuto?min=15'

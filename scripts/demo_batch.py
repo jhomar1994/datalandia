@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from scripts.prueba_escala import execute
 
-DEFAULT_RECORDS = 10000
+DEFAULT_RECORDS = 1000000
 DEFAULT_WORKERS = 2
 
 
@@ -18,7 +18,7 @@ def parse_args(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--records", type=int, default=DEFAULT_RECORDS)
     parser.add_argument("--workers", type=int, choices=(1, 2, 3), default=DEFAULT_WORKERS)
-    parser.add_argument("--max-minutes", type=int, default=15)
+    parser.add_argument("--max-minutes", type=int, default=30)
     parser.add_argument("--input", type=Path, help="Carpeta de muestra local; por defecto una por volumen")
     args = parser.parse_args(argv)
     if not 1 <= args.records <= 3000000 or not 3 <= args.max_minutes <= 45:

@@ -15,6 +15,14 @@ parser.add_argument('--template',type=Path,required=True,help='Plantilla PPTX or
 args=parser.parse_args()
 SOURCE=args.template.expanduser().resolve()
 if not SOURCE.is_file():parser.error('La plantilla indicada no existe.')
+EVIDENCE=ROOT/'docs/evidencias/batch_1m.json'
+if not EVIDENCE.is_file():parser.error('Falta la evidencia real del batch de un millón.')
+batch=json.loads(EVIDENCE.read_text())
+if batch['state']!='JOB_STATE_DONE':parser.error('La evidencia batch no acredita DONE.')
+fmt=lambda n:f'{n:,}'.replace(',','.')
+records=fmt(batch['input_records']);accepted=fmt(batch['counts']['accepted'])
+rejected=fmt(batch['counts']['rejected']);zones=str(batch['counts']['valid_origin_zones'])
+rate=f"{batch['timing']['throughput_job_records_s']:.1f}".replace('.',',')
 OUT=ROOT/'presentation/output/Lumina_P3_15min.pptx'
 A='http://schemas.openxmlformats.org/drawingml/2006/main'
 P='http://schemas.openxmlformats.org/presentationml/2006/main'
@@ -113,7 +121,7 @@ for t in cover.findall('.//a:t',NS):
 cover_builder=Slide(1,'','');cover_builder.root=cover;cover_builder.tree=cover.find('p:cSld/p:spTree',NS)
 cover_builder.text(.82,1.40,8.0,.75,'Monitoreo operativo en GCP',30,WHITE,True)
 cover_builder.text(.82,2.18,8.0,.40,'Exposición de datos y demo end-to-end',20,WHITE)
-cover_builder.text(8.30,6.65,4.2,.28,'Proyecto P3  /  20 noviembre 2026',13,WHITE,align='r')
+cover_builder.text(8.30,6.65,4.2,.28,'Proyecto P3  /  21 noviembre 2026',13,WHITE,align='r')
 slides=[cover];notes=[]
 notes.append(('Lumina: resumen y equipo',30,'Presentar al equipo de la plantilla: Christian Cajusol, Hugo Ángeles, Jhomar Yurivilca y Francisco Meza. Explicar que es un prototipo académico de movilidad. Iniciar el controlador de streaming al comenzar la exposición desde una segunda terminal, siguiendo el guion de preparación. No ejecutar demo_e2e.py anticipadamente: ese script termina solo y podría cerrarse antes de la demo.','Plantilla del usuario; README.md; demo/README.md.'))
 
@@ -129,21 +137,22 @@ s=Slide(3,'Situación actual y correcciones de P2','02  Estado del proyecto')
 s.shape(.6,1.95,5.90,3.95,INK,'roundRect');s.text(.90,2.22,5.3,.5,'Observaciones P2',24,WHITE,True)
 s.text(.90,3.05,5.25,2.7,'Capturas sin reproducción clara\n\nCobertura cloud limitada\n\nJobs sin ciclo operativo verificable',21,WHITE)
 s.shape(6.78,1.95,5.95,3.95,WHITE,'roundRect');s.text(7.08,2.22,5.3,.5,'Evidencia P3',24,BLUE,True)
-s.text(7.08,3.05,5.25,2.7,'Código modular, Terraform y pruebas\n\n255 zonas batch y 11 de sensores\n\nControlador con límite y cierre',21,INK)
-s.text(.85,6.18,11.6,.50,'Pendientes: publicar el commit final y probar escala y continuidad.',20,BLUE,True)
-s.footer('Cobertura observada en muestras. Un worker no demuestra escalabilidad horizontal.')
-slides.append(s.root);notes.append(('Situación actual',60,'Responder a cada observación sin exagerar. La trazabilidad mejora con código, contratos, guías y evidencias. El repositorio público existe, pero el commit final debe publicarse antes de entregar. La prueba batch real usó 10.000 entradas y produjo viajes válidos en 255 zonas. Los sensores cubren once zonas. Un batch DONE es correcto; detener streaming después de una prueba es control de costos, pero no operación 24/7.','docs/revision_observaciones_p2.md; docs/evidencias/demo_final.json; docs/evidencias/actualizacion_tablero.json.'))
+s.text(7.08,3.05,5.25,2.7,f'Código publicado y reproducible\n\n{records} viajes / {zones} zonas válidas\n\n2 workers batch y cierre verificado',21,INK)
+s.text(.85,6.18,11.6,.50,'Pendientes: escalamiento comparado, recuperación y continuidad.',20,BLUE,True)
+s.footer('Un millón procesado en GCP; dos workers observados. No acredita escalamiento lineal ni servicio 24/7.')
+slides.append(s.root);notes.append(('Situación actual',60,f'La entrega pública incluye código, contratos, SQL, Terraform y guías. La prueba principal procesó {records} entradas reales y produjo {accepted} válidas y {rejected} rechazos en {zones} zonas, con dos VMs observadas. La fuente abarca 260 códigos de origen; los inválidos explican la menor cobertura válida. El streaming abarca once zonas. Se mitiga la muestra reducida con cien veces más volumen cloud; todavía faltan comparaciones controladas de escalamiento y recuperación 24/7.','docs/evidencias/batch_1m.json; docs/revision_observaciones_p2.md.'))
 
 s=Slide(4,'Criterios de éxito y performance','03  KPI de la demostración')
-s.table(.6,1.90,12.12,[.55,.83,.83,.83,.83],[2.7,4.45,2.2,2.77],[
+s.table(.6,1.90,12.12,[.55,.70,.70,.70,.70,.70],[2.7,4.45,2.2,2.77],[
  ['KPI','Fórmula','Meta demo','Medido'],
  ['Contabilidad batch','(válidos + rechazos) / entradas','100 %','100 %'],
- ['Disponibilidad del evento','t primera respuesta API − t publicación','≤ 60 s*','1,35 s*'],
+ ['Rendimiento batch','entradas / duración del job','Medir',f'{rate} filas/s'],
+ ['Disponibilidad del evento','t primera respuesta API − t publicación','≤ 60 s*','11,006 s*'],
  ['Reproceso seguro','Δ filas tras repetir MERGE serial','0','0'],
  ['Cierre de cómputo','Jobs activos / máquinas virtuales','0 / 0','0 / 0']],18)
 s.text(.85,6.00,11.6,.62,'* Un evento de control con el worker preparado. No es p95 ni SLA.',20,BLUE,True)
-s.footer('Fuentes: evidencia batch y prueba streaming del 20/11/2026. Metas propuestas para la demo.')
-slides.append(s.root);notes.append(('KPI',75,'Contabilidad: (8.459 + 1.541) / 10.000 = 100%. La tasa de aceptación 84,59% es un resultado de muestra, no una meta. La disponibilidad 1,35 s corresponde a un único evento con worker ya listo en el job lumina-p3-stream-20261120110633. No confundir con el KPI promedio del tablero ni incluirlo como percentil. La repetición serial del MERGE mantiene 8.459 viajes. El cierre verificado quedó en cero jobs y VMs. Las metas son de demo y no un SLA contractual.','docs/evidencias/demo_final.json; docs/evidencias/actualizacion_tablero.json; tests/test_bigquery_merge.py.'))
+s.footer('Batch 21/11 y streaming 20/11/2026. Rendimiento bruto del job: incluye arranque y cargas BigQuery.')
+slides.append(s.root);notes.append(('KPI',75,f'Conciliación: ({accepted} + {rejected}) / {records} = 100%. Se contrastaron IDs distintos y filas físicas. La duración Dataflow fue 324,595 s; el controlador, 352 s. El rendimiento bruto {rate} entradas/s incluye arranque y cargas BigQuery, excluyendo MERGE posterior. Repetir MERGE conservó 937.453 viajes y USD 24.490.375,32. El evento streaming de control del 20/11 tardó 11,006 s con worker preparado; no es p95 ni SLA. Se comprobó cero jobs/VMs al cierre.','docs/evidencias/batch_1m.json; informe final, evidencia streaming del 20/11/2026.'))
 
 s=Slide(5,'Productos tecnológicos','04  Plataforma seleccionada')
 s.card(.6,1.95,3.88,4.55,'Ingesta','Cloud Storage\nArchivos y catálogos\n\nPub/Sub\nMensajes de sensores','1',20)
@@ -153,7 +162,7 @@ s.footer('Proyecto proyecto-datalandia. Región us-central1. Workflows verifica 
 slides.append(s.root);notes.append(('Tecnologías',45,'Explicar responsabilidades sin enumerar todos los servicios GCP. Terraform aprovisiona. El controlador Python opera Dataflow y cierra workers. Workflows comprueba conteos. Cloud Run sirve la API y el HTML desde el mismo origen, con autenticación IAM. No se usa Dataproc, Composer ni Kubernetes propio.','infra/terraform/; pipelines/cloud/pipeline_beam.py; api/app/; workflows/verificar.yaml.'))
 
 s=Slide(6,'Dependencias, supuestos y fuera de alcance','05  Condiciones de la solución')
-items=[('Fuentes reales','TLC 2024, AoT 2018\ny contexto histórico 2017.'),('Homologación simulada','Zonas y desplazamiento\nde fechas sin equivalencia\ngeográfica real.'),('Acceso y red','Internet, ADC e IAM.\nWorkers privados en\nus-central1.'),('Límite de la prueba','Un worker por job.\nSin benchmark masivo\nni prueba de alta carga.'),('Fuera de alcance','Sensores físicos, forecast,\nagente Vertex y alta\ndisponibilidad 24/7.'),('Operación','Vigilancia local y cierre.\nEl arranque del worker\ntarda varios minutos.')]
+items=[('Fuentes reales','TLC 2024, AoT 2018\ny contexto histórico 2017.'),('Homologación simulada','Zonas y desplazamiento\nde fechas sin equivalencia\ngeográfica real.'),('Acceso y red','Internet, ADC e IAM.\nWorkers privados en\nus-central1.'),('Límite de la prueba','1.000.000 de entradas.\n2 workers batch.\nSin prueba de fallos.'),('Fuera de alcance','Sensores físicos, forecast,\nagente Vertex y alta\ndisponibilidad 24/7.'),('Operación','Vigilancia local y cierre.\nEl arranque del worker\ntarda varios minutos.')]
 for i,(title,body) in enumerate(items):
  x=.6+(i%3)*4.13;y=1.95+(i//3)*2.35
  s.shape(x,y,3.88,2.10,WHITE,'roundRect');s.text(x+.23,y+.20,3.42,.40,title,21,BLUE,True);s.text(x+.23,y+.72,3.42,1.30,body,18)
@@ -163,7 +172,7 @@ slides.append(s.root);notes.append(('Dependencias y alcance',60,'Las fuentes son
 s=Slide(7,'Arquitectura final y unidades de consumo','06  Diseño desplegado en GCP')
 s.text(.62,1.72,6.5,.35,'BATCH',14,BLUE,True);s.text(.62,3.83,6.5,.35,'STREAMING',14,BLUE,True)
 s.box(.6,2.15,1.85,1.40,'Storage','Viajes TLC\ny catálogos')
-s.box(3.0,2.15,1.85,1.40,'Dataflow','Batch\n1 vCPU')
+s.box(3.0,2.15,1.85,1.40,'Dataflow','Batch\n2 × 1 vCPU')
 s.box(5.4,2.15,1.85,1.40,'Staging','MERGE serial\ny cuarentena',CYAN)
 s.box(.6,4.25,1.85,1.40,'Publicador','Laptop\nReplay AoT')
 s.box(3.0,4.25,1.85,1.40,'Pub/Sub','Topic y\nsuscripción')
@@ -174,16 +183,16 @@ s.box(10.5,4.20,2.2,1.40,'Tablero','Gráfico por minuto\ny último evento')
 for y in [2.85,4.95]:
  s.arrow(2.45,y,2.93,y);s.arrow(4.85,y,5.33,y);s.arrow(7.25,y,7.93,y)
 s.arrow(9.85,3.2,10.43,3.2);s.arrow(11.6,4.0,11.6,4.13)
-s.text(.65,5.85,12.0,.78,'Un worker por job, disco de 30 GB y sin IP pública\nCloud Run: 0 a 1 instancia, 0,25 vCPU y 256 MiB',18,INK)
+s.text(.65,5.85,12.0,.78,'Batch: 2 workers. Streaming: 1. Disco 30 GB/worker, sin IP pública\nCloud Run: 0 a 1 instancia, 0,25 vCPU y 256 MiB',18,INK)
 s.footer('Terraform aprovisiona recursos e IAM. Workflows verifica conteos. El controlador local gestiona el ciclo de demo.')
 slides.append(s.root);notes.append(('Arquitectura',90,'Leer dos rutas que convergen en BigQuery. En batch se cargan archivos desde Storage y se consolida por MERGE transaccional serial. Streaming recibe replay por Pub/Sub y aplica validación antes de STREAMING_INSERTS. Silver conserva copias, Gold deduplica y excluye IDs conflictivos. La API usa vistas Gold y tablas recientes con máximo de 128 MiB por consulta y caché compartida. El navegador accede a la API desplegada en GCP mediante un proxy autenticado local: localhost no significa que el backend esté corriendo en la laptop. Vincular cada recurso con las horas y volúmenes de la estimación anual.','infra/terraform/; sql/bigquery/; api/README.md; costs/calculator.py.'))
 
 s=Slide(8,'Estimación de consumo del primer año','07  Calculadora preliminar')
-s.table(.6,1.90,12.12,[.60,.82,.82],[4.0,2.5,2.65,2.97],[['Escenario','Streaming / mes','USD / mes','USD / año'],['Bajo demanda','10 h','13,77','165,27'],['Continuo','730 h','336,44','4.037,31']],21)
-s.text(.85,4.45,11.7,1.12,'Supuestos comunes: 10 h de batch al mes, 0,1 TiB de consultas,\n10 GiB medios en BigQuery y 2 GiB de tráfico Pub/Sub al mes.',19)
+s.table(.6,1.90,12.12,[.60,1.0,1.0],[6.0,3.0,3.12],[['Escenario empresarial','USD / mes','USD / año'],['Un job streaming 24/7\nArchivo regional','286,35','3.436,16'],['Dos jobs en zonas distintas\nDos suscripciones y archivo nam4','479,15','5.749,79']],21)
+s.text(.85,4.45,11.7,1.12,'500 sensores: 1 evento/15 s. Batch: 20.000 viajes/día.\nLa prueba puntual de un millón no equivale a un millón diario.',19)
 s.shape(.6,5.77,12.12,.75,CYAN,'roundRect');s.text(.85,5.94,11.6,.42,'Demo: presupuesto S/50. Gasto facturado: NO VERIFICADO.',22,INK,True)
-s.footer('Modelo con reservas y 30 % de contingencia. SECU sin calibrar. Sin descuentos, impuestos ni créditos.')
-slides.append(s.root);notes.append(('Calculadora',90,'Estimación de planificación, no cotización ni factura. El escenario bajo demanda reserva diez horas mensuales de streaming y diez de batch. El continuo modela 730 horas de streaming con el mismo worker, sin garantizar capacidad o SLA. Ambos asumen 0,1 TiB de consultas, 10 GiB medios BigQuery, 2 GiB Pub/Sub, dos SECU por hora de streaming como supuesto NO VERIFICADO, reservas por discos, Storage, inserts, Cloud Run, build, imágenes y logging. El modelo aplica 30% de contingencia. Los importes anuales se calculan antes de redondear mensual, por eso pueden diferir unos centavos de 12 por el mensual mostrado. El tipo de cambio de S/4 por USD del archivo es supuesto, no cotización. La retención debe revisarse para sostener almacenamiento medio. El gasto real de Cloud Billing sigue NO VERIFICADO. No afirmar que S/50 cubre operación anual.','costs/calculator.py; costs/estimate.json; costs/README.md. Tarifas consultadas 20/11/2026: https://cloud.google.com/dataflow/pricing ; https://cloud.google.com/bigquery/pricing ; https://cloud.google.com/pubsub/pricing ; https://cloud.google.com/run/pricing .'))
+s.footer('Proyección con 25 % de contingencia. Redundancia propuesta, no desplegada. Sin impuestos, descuentos ni créditos.')
+slides.append(s.root);notes.append(('Calculadora',90,f'La proyección empresarial usa 500 sensores con un evento de 1 KiB cada quince segundos, veinte mil viajes diarios y batch de dos workers durante treinta minutos al día. El millón de esta prueba es una carga puntual y no reemplaza ese supuesto diario. El escenario con un job streaming 24/7 y archivo regional estima USD 3.436,16 al año. La propuesta redundante tiene dos jobs en zonas distintas, dos suscripciones y archivo nam4; estima USD 5.749,79 al año, incluida contingencia del 25%. No está desplegada. No se promete recuperación regional completa. Sin impuestos, créditos ni descuentos. La factura real sigue NO VERIFICADO.','costs/enterprise_estimate.json; costs/primer_ano_redundancia.md; tarifas oficiales enlazadas en esos archivos.'))
 
 s=Slide(9,'Demostración end-to-end','08  Tres minutos para ver el flujo')
 for i,(t,b) in enumerate([('Publicar','Ráfaga de IDs nuevos\ny dos inválidos.\nWorker ya preparado.'),('Observar','Barras por minuto,\núltimo evento y\nrechazos en el tablero.'),('Verificar y cerrar','Contrastar API y Gold.\nSolicitar drain y\ncomprobar cero VMs.')]):s.card(.6+4.13*i,1.95,3.88,3.45,t,b,str(i+1),20)
@@ -192,29 +201,29 @@ s.footer('Respaldo: ?demo=1 muestra datos simulados y lo declara. No sustituye l
 slides.append(s.root);notes.append(('Demo en vivo',180,'Preparación: seguir presentation/demo_15min.md. Al comenzar la exposición, otro integrante inicia scripts/run_dataflow.py en una terminal con límite de 15 minutos y archivo de stop nuevo. Publica el warmup preparado y comprueba su ID en la API antes de este bloque. No lanzar un segundo job. Minuto 0: mostrar job y su worker. Publicar los 62 mensajes preparados a un evento por segundo mientras el tablero se actualiza cada cinco segundos. Minuto 1: observar barras azules/naranjas y último ID, explicar ahora del servidor. Minuto 2: mostrar /eventos/ultimo y /eventos/por-minuto?min=15 en Swagger, y la cuarentena. Solicitar drain al terminar, continuar con resultados mientras cierra, verificar cero jobs/VMs al final. Si no está listo a tiempo, usar evidencia real guardada y declarar cualquier uso de modo simulado. El modo preparar/publicar/cerrar integrado en demo_e2e.py aún no está implementado: este guion utiliza los CLI existentes por separado.','demo/README.md; scripts/run_dataflow.py; pipelines/cloud/publicar_eventos.py; api/README.md; presentation/demo_15min.md.'))
 
 s=Slide(10,'Evidencias de funcionamiento','09  Resultados observados')
-s.metric(.6,1.95,3.88,'10.000','Entradas batch','8.459 válidas y 1.541 rechazadas')
-s.metric(4.73,1.95,3.88,'257','Mensajes streaming','Incluye replay, controles e inválidos')
-s.metric(8.86,1.95,3.88,'18','Pruebas de contrato','API, validación, caché y casos vacíos')
+s.metric(.6,1.95,3.88,records,'Entradas batch',f'{accepted} válidas / {rejected} rechazos')
+s.metric(4.73,1.95,3.88,'287','Mensajes streaming','60 nuevos + replay, controles e inválidos')
+s.metric(8.86,1.95,3.88,'30','Pruebas locales','21 de API/contratos y 9 de controladores')
 s.shape(.6,3.78,7.45,2.65,WHITE,'roundRect');s.text(.88,4.02,6.88,.45,'Movimiento verificado en Chrome',23,BLUE,True)
-s.text(.88,4.76,6.88,1.35,'Aceptadas: 185 a 215 en la ráfaga\nBarras azules y naranjas actualizadas\nÚltimo evento: cambio de valor e ID',20)
+s.text(.88,4.76,6.88,1.35,f'Batch: {zones} zonas válidas y 2 VMs observadas\nStreaming: barras aceptadas y rechazadas\nÚltimo evento: cambio de valor e ID',20)
 s.shape(8.33,3.78,4.40,2.65,CYAN,'roundRect');s.text(8.60,4.05,3.86,.66,'Cierre verificado',25,INK,True)
 s.text(8.60,4.90,3.86,1.10,'Job DRAINED\n0 jobs activos / 0 VMs',22,INK,True)
 s.footer('Conteos de pruebas concretas, no totales actuales. La homologación sigue siendo simulada.')
-slides.append(s.root);notes.append(('Evidencias',60,'Las cifras pertenecen a ejecuciones documentadas y no deben compararse como si fueran una sola carga. Batch: 10.000 entradas y 255 zonas de origen válidas. Streaming: 257 mensajes incluyen 220 de replay, cinco controles, treinta eventos nuevos y dos fixtures inválidos. Muchos IDs históricos ya existían: no son 257 nuevas lecturas únicas. Durante la ráfaga el KPI pasó de 185 a 215. Dieciocho pruebas de API y contratos, más dos integraciones SQL de BigQuery documentadas aparte. Se revisó visualmente el modo real y el simulado en Chrome. El cierre quedó DRAINED y cero workers/VMs en el corte observado.','docs/evidencias/demo_final.json; docs/evidencias/actualizacion_tablero.json; tests/README.md.'))
+slides.append(s.root);notes.append(('Evidencias',60,f'Batch principal: {records} entradas, {accepted} válidas, {rejected} rechazos, {zones} zonas, dos VMs observadas y DONE. Los conteos están filtrados por batch_id. Streaming del 20/11: 287 mensajes incluyen 220 de replay, cinco controles, sesenta eventos nuevos y dos fixtures inválidos; no son 287 lecturas únicas nuevas. Se confirmó el último ID y las barras de aceptadas/rechazadas. Hay veintiuna pruebas de API/contratos y nueve de controladores registradas, además de integraciones SQL reales. El reproceso del millón volvió a comprobarse en BigQuery sin filas nuevas.','docs/evidencias/batch_1m.json; docs/evidencias/tablero_batch.md; tests/README.md.'))
 
 s=Slide(11,'Conclusiones','10  Factibilidad y límites')
 s.card(.6,1.95,3.88,4.4,'Integración funcional','El dato recorre ingesta,\nvalidación, BigQuery,\nAPI y aplicación\nconsumidora en GCP.','1',21)
 s.card(4.73,1.95,3.88,4.4,'Calidad auditable','Contratos, cuarentena,\nMERGE y deduplicación\npermiten explicar cada\nresultado y reintento.','2',21)
 s.card(8.86,1.95,3.88,4.4,'Operación acotada','La ejecución bajo demanda\ny el cierre limitan consumo.\nEscala, recuperación y\nservicio 24/7 requieren\notra validación.','3',20)
 s.footer('La demostración prueba factibilidad técnica del prototipo. No mide retorno económico ni capacidad de producción.')
-slides.append(s.root);notes.append(('Conclusiones',60,'Cerrar el argumento: se logró la exposición y el consumidor con una ruta real de extremo a extremo. La calidad y la idempotencia son decisiones centrales para confiar en los agregados. El presupuesto condicionó una prueba funcional de un worker. Detener el cómputo después de demostrarlo es una decisión operativa defendible, pero no reemplaza observabilidad y recuperación en producción. No prometer ahorros, SLA ni horizontalidad no medidos.','docs/evidencias/actualizacion_tablero.json; docs/revision_observaciones_p2.md.'))
+slides.append(s.root);notes.append(('Conclusiones',60,f'Se conectaron ingesta, procesamiento en GCP y consumidor. La calidad y la idempotencia permiten auditar el resultado. La evidencia batch amplía el volumen a un millón con dos workers y mediciones explícitas. Esto no permite afirmar escalamiento lineal ni capacidad productiva garantizada. La ejecución bajo demanda y el cierre acotan consumo; la operación continua y la recuperación automática siguen pendientes.','docs/evidencias/batch_1m.json; docs/revision_observaciones_p2.md.'))
 
 s=Slide(12,'Next steps y entrega del repositorio','11  Prioridades de cierre y evolución')
-for i,(title,body) in enumerate([('Antes de entregar','Publicar el commit final y evidencias.\nEnsayar demo, turnos y control de gasto.'),('Siguiente iteración','Separar preparación, publicación y cierre.\nMedir carga, consultas, costos y retención.'),('Evolución operativa','Alertas, recuperación y CI/CD.\nEstado Terraform compartido y prueba de capacidad.')]):
+for i,(title,body) in enumerate([('Trazabilidad continua','Versionar código y evidencias por ejecución.\nAutomatizar pruebas y despliegues.'),('Siguiente iteración','Separar preparación, publicación y cierre.\nMedir carga, consultas, costos y retención.'),('Evolución operativa','Alertas, recuperación y CI/CD.\nEstado Terraform compartido y prueba de capacidad.')]):
  y=1.9+i*1.28;s.shape(.6,y,12.12,1.04,WHITE,'roundRect');s.text(.86,y+.18,3.14,.66,title,23,BLUE,True);s.text(4.15,y+.13,8.20,.84,body,17)
 s.text(.85,6.03,11.7,.42,'github.com/jhomar1994/datalandia',25,BLUE,True)
 s.footer('Rama de trabajo: feat/p3-entrega-final. Atribución individual: confirmar con el equipo antes de sustentar.')
-slides.append(s.root);notes.append(('Next steps',90,'Primero cerrar el entregable, sin afirmar que el código local ya está publicado. Compartir el enlace al commit final cuando se haga push. Distribuir la exposición entre los cuatro integrantes y confirmar aportes reales: no inventar autorías ni responsabilidades. La separación preparar/publicar/cerrar es una mejora pendiente del controlador integrado. Para producción hacen falta capacidad, retención por processed_at, alertas, recuperación automática y backend de estado compartido. Retomar el presupuesto y una cotización con mediciones. Finalizar comprobando que Dataflow y las VMs quedaron en cero.','README.md; docs/revision_observaciones_p2.md; costs/README.md; https://github.com/jhomar1994/datalandia.'))
+slides.append(s.root);notes.append(('Next steps',90,f'La siguiente etapa consiste en validar cargas representativas y comparar el mismo lote con uno y dos workers; definir retención y objetivos de servicio; implementar orquestación administrada, alertas, recuperación y CI/CD. Mantener trazabilidad por commit y evidencia de cada ejecución. La propuesta redundante del presupuesto requiere implementación y pruebas de fallos. Cerrar comprobando jobs y VMs, y confirmar las contribuciones individuales con el equipo.','docs/evidencias/batch_1m.json; costs/primer_ano_redundancia.md; docs/revision_observaciones_p2.md.'))
 
 assert len(slides)==len(notes)==12
 assert sum(n[1] for n in notes)==900

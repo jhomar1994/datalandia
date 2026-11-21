@@ -78,7 +78,19 @@ Los objetos son inmutables por contenido. Se cargaron 2.694 filas en `puente_bat
 y 263 en `referencia_zona`. El workflow `lumina-verificar` terminó en `SUCCEEDED`, con hechos y cruces en cero.
 Este workflow verifica; aún no orquesta el ciclo de vida de Dataflow.
 
-## Pruebas reales del 20/11/2026
+## Prueba principal: un millón en Dataflow, 21/11/2026
+
+La entrada de 1.000.000 de viajes reales terminó en `DONE` con dos workers
+`n1-standard-1` observados: 937.453 válidos, 62.547 rechazos y 255 zonas válidas.
+Duración Dataflow 324,595 s, controlador 352 s; conciliación 100 % y reproceso sin filas
+nuevas. Resultado, SQL e identificadores en [batch_1m.json](evidencias/batch_1m.json);
+[interpretación y reproducción](evidencias/batch_1m.md).
+
+Los siguientes apartados conservan la preparación y las ejecuciones iniciales de P3.
+Los 100.000 preparados/validados localmente y los 10.000 iniciales en cloud son antecedentes,
+no la muestra principal de la entrega final.
+
+## Pruebas históricas reales del 20/11/2026
 
 | Proceso | Entrada | Válidos en Silver | Rechazados | Cobertura |
 |---|---:|---:|---:|---:|
