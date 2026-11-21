@@ -4,7 +4,7 @@ El HTML vigente vive en `api/static/index.html`, servido por FastAPI en `/` y de
 `consumer/index.html` conserva una copia idéntica para revisión/respaldo; actualizarla al cambiar el original.
 Se conservó el diseño compartido. Única corrección funcional: null no se convierte a cero en JavaScript.
 
-- Sin parámetros: consulta los seis endpoints del mismo origen cada cinco segundos.
+- Sin parámetros: consulta siete endpoints del mismo origen cada cinco segundos, incluido `/batch/ultimo`.
 - `?every=10`: intervalo personalizado, mínimo dos segundos.
 - `?api=https://...`: base alternativa; requiere autorización/CORS en ese servidor. No se habilita CORS abierto.
 - `?demo=1`: plan B con datos simulados y aviso explícito, sin consultar la API.

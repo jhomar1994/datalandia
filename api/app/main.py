@@ -35,6 +35,10 @@ def create_app(repository=None, settings=None, static_dir=None):
     def dashboard_kpis():
         return repo.dashboard_kpis()
 
+    @app.get("/batch/ultimo")
+    def dashboard_batch():
+        return repo.dashboard_batch()
+
     @app.get("/latencia")
     def dashboard_latency():
         return repo.dashboard_latency()

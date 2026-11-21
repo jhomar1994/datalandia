@@ -148,7 +148,7 @@ streaming**. Workflows comprueba resultados, pero no administra el ciclo de vida
 |---|---|
 | Cloud Storage | `proyecto-datalandia-637872675138-data`, `proyecto-datalandia-637872675138-data-staging` y `proyecto-datalandia-637872675138-data-temp`. Entradas, paquetes y temporales. |
 | Pub/Sub | Topic `lumina-eventos`, suscripción `lumina-streaming`; retención de un día. |
-| BigQuery | Dataset `proyecto-datalandia.lumina_demo`: siete tablas y cinco vistas. |
+| BigQuery | Dataset `proyecto-datalandia.lumina_demo`: ocho tablas (incluido control batch) y cinco vistas. |
 | Dataflow | Jobs temporales creados bajo demanda. Batch: un `n1-standard-1`; streaming: un `n1-standard-2` con Streaming Engine; disco de 30 GB, sin autoescalado. |
 | Red | VPC `lumina-dataflow-net`, subred `lumina-dataflow-subnet`, Private Google Access y workers sin IP pública. Sin NAT. |
 | Cloud Run | Servicio privado `lumina-api`, de cero a una instancia, 0,25 vCPU y 256 MiB. Sirve API y HTML. |
@@ -234,10 +234,14 @@ El build incluye solo código de API, dependencias y estáticos; no empaqueta da
 | `/rechazos?limit=5` | Motivo y resumen de los últimos rechazos. |
 | `/docs` | Contrato OpenAPI interactivo. |
 
-El tablero consulta seis endpoints cada cinco segundos. Comparten una consulta de BigQuery
+El tablero consulta siete endpoints cada cinco segundos. Los seis originales comparten una consulta de BigQuery
 y una caché de cuatro segundos, con bloqueo para evitar consultas simultáneas repetidas.
 `ahora` se recalcula al responder incluso con caché. Cada job tiene máximo de 128 MiB
 facturables; este límite no es un presupuesto monetario global.
+El séptimo, `/batch/ultimo`, consulta la tabla de control `batch_ejecuciones` con su propia
+caché y el mismo límite. Muestra entradas esperadas, conteos por job, estado observado y
+consolidación. La demo batch actualiza estos datos; una caída del controlador puede dejar
+el estado desactualizado. El bloque muestra el timestamp de actualización.
 Se conservan las rutas de trazabilidad `/api/*`; `/ventanas` fue retirado.
 
 Los indicadores de sesión usan 120 minutos por defecto. Aceptadas cuenta IDs de sensores
@@ -279,7 +283,7 @@ ADC y permisos correspondientes; Terraform se requiere para gestionar infraestru
 En un equipo nuevo, coordinar los datos de entrada, el manifiesto de staging y el estado
 Terraform. No publicar credenciales o estados para facilitar el traspaso. El repositorio
 identificado es [github.com/jhomar1994/datalandia](https://github.com/jhomar1994/datalandia);
-la publicación de los cambios finales sigue pendiente en el corte de esta guía.
+la entrega P3 se mantiene en la rama `feat/p3-entrega-final`. Consultar el historial de esa rama para identificar la versión de código utilizada.
 
 ### Tercero: elegir el recorrido
 

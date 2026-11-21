@@ -22,11 +22,15 @@ corresponde a la pausa antes o después del procesamiento, no al estado esperado
 
 Operación implementada:
 
-- `run_dataflow.py`: un worker privado, vigilancia y cierre; requiere entorno Beam.
+- `demo_batch.py --records 10000`: demo batch independiente, con volumen configurable y dos workers por defecto.
+- `demo_streaming.py --events 60 --rate 1`: demo streaming con cantidad/frecuencia configurables, controles y cierre. Requiere proxy de Cloud Run.
+- `prueba_escala.py`: comando único para preparar, subir y ejecutar el batch de un millón de viajes con dos workers; consolida tras `DONE` y verifica cierre. Genera consumo GCP.
+- `run_dataflow.py`: workers privados, vigilancia y cierre; requiere entorno Beam. Por defecto un worker y doce minutos. Batch admite `--workers 1..3` y hasta 45 minutos; streaming conserva un worker y hasta quince minutos.
 - `demo_e2e.py`: lanza streaming, publica y verifica API/BigQuery, solicita cierre.
 - `build_api.py`: empaqueta API/consumidor y construye en Cloud Build; requiere entorno API.
 
 Comandos y límites en `demo/README.md` y `api/README.md`.
+La [prueba batch de un millón de viajes](../docs/prueba_escala_cloud.md) utiliza dos workers fijos y una entrada separada.
 
 Preparación del bundle y referencias:
 

@@ -5,6 +5,9 @@ La infraestructura base está aplicada y verificada: 44 recursos añadidos, sin 
 Ver [evidencia inicial](../../docs/evidencias/infraestructura_base.md). La ampliación P3 añade siete tablas,
 cinco vistas y el workflow `lumina-verificar`.
 
+La ampliación del tablero incorpora una octava tabla, `batch_ejecuciones`, para estados y
+conteos batch. Es un recurso nuevo; no recrea las tablas de datos ni modifica sus particiones.
+
 ## Recursos definidos
 
 - Quince APIs requeridas por almacenamiento, mensajería, procesamiento, IAM y orquestación.

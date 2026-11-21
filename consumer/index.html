@@ -173,6 +173,21 @@
     </div>
   </section>
 
+  <section class="card stack" aria-label="Última ejecución batch">
+    <div class="head-row">
+      <h2>Última ejecución batch</h2>
+      <span class="small muted" id="batch-status" role="status" aria-live="polite">Consultando…</span>
+    </div>
+    <div class="kpis" style="margin-top:16px">
+      <div class="kpi"><span class="label">Viajes de entrada</span><span class="value" id="batch-input">—</span></div>
+      <div class="kpi"><span class="label">Viajes válidos</span><span class="value" id="batch-valid">—</span></div>
+      <div class="kpi"><span class="label">Rechazados batch</span><span class="value" id="batch-rejected">—</span></div>
+      <div class="kpi"><span class="label">Zonas de origen válidas</span><span class="value" id="batch-zones">—</span></div>
+    </div>
+    <p class="small muted" id="batch-detail">Esperando información del controlador batch.</p>
+    <p class="small muted">Conteos de esta ejecución; válidos no equivale a viajes nuevos añadidos. Workers indicados son los solicitados.</p>
+  </section>
+
   <section class="card stack" aria-label="Desglose de latencia">
     <div class="head-row">
       <h2>Recorrido del evento</h2>
@@ -265,6 +280,7 @@
  *
  * Contrato esperado (JSON):
  *   GET /kpis          {aceptadas, rechazadas, recibidas, latencia_e2e_s, latencia_meta_s, zonas_activas, ultima_ingesta}
+ *   GET /batch/ultimo  {batch_id, estado, entradas, validos, rechazados, zonas, consolidado, workers_solicitados, iniciado, actualizado}; sin registros: {}
  *   GET /latencia      {etapas:[{nombre, servicio, segundos}], total_s}
  *   GET /zonas         {ventana_inicio, ventana_fin, zonas:[{zona_id, lecturas, viajes, importe_km, valor_medio, unidad}]}
  *   GET /eventos/por-minuto?min=15 {minutos:[{minuto, aceptadas, rechazadas}]}   (ascendente, minutos sin eventos = 0)
@@ -325,11 +341,12 @@
 
   function loadAll() {
     if (DEMO) return Promise.resolve(Demo.next());
-    var paths = ['/kpis', '/latencia', '/zonas', '/eventos/por-minuto?min=15', '/eventos/ultimo', '/rechazos?limit=5'];
+    var paths = ['/kpis', '/latencia', '/zonas', '/eventos/por-minuto?min=15', '/eventos/ultimo', '/rechazos?limit=5', '/batch/ultimo'];
     return Promise.allSettled(paths.map(getJSON)).then(function (rs) {
       var errors = rs.filter(function (r) { return r.status === 'rejected'; }).map(function (r) { return r.reason.message; });
       var v = rs.map(function (r) { return r.status === 'fulfilled' ? r.value : null; });
       return { kpis: v[0], latencia: v[1], zonas: v[2], porMinuto: v[3], ultimo: v[4], rechazos: v[5],
+               batch: v[6],
                errors: errors, total: paths.length };
     });
   }
@@ -367,6 +384,26 @@
     if (d.porMinuto) renderChart(d.porMinuto.minutos || []);
     if (d.ultimo) renderLast(d.ultimo);
     if (d.rechazos) renderRejections(d.rechazos.rechazos || []);
+    if (d.batch != null) renderBatch(d.batch);
+    else $('batch-status').textContent = 'Sin conexión · datos anteriores si existen';
+  }
+
+  function renderBatch(b) {
+    [['batch-input', b.entradas], ['batch-valid', b.validos],
+     ['batch-rejected', b.rechazados], ['batch-zones', b.zonas]].forEach(function (p) {
+      $(p[0]).textContent = num(p[1]) == null ? '—' : Number(p[1]).toLocaleString('es-PE');
+    });
+    if (!b.batch_id) {
+      $('batch-status').textContent = 'Sin ejecuciones registradas';
+      $('batch-detail').textContent = 'Ejecuta la demo batch para registrar sus resultados.';
+      return;
+    }
+    var labels = { PREPARANDO: 'Preparando', JOB_STATE_PENDING: 'Pendiente', JOB_STATE_RUNNING: 'Procesando',
+      JOB_STATE_DONE: b.consolidado ? 'Terminado · consolidado' : 'Terminado · consolidación pendiente',
+      JOB_STATE_FAILED: 'Falló', JOB_STATE_CANCELLED: 'Cancelado', ERROR_ENVIO: 'Error de envío' };
+    $('batch-status').textContent = labels[b.estado] || b.estado || 'Estado no disponible';
+    $('batch-detail').textContent = b.batch_id + ' · workers solicitados: ' + (b.workers_solicitados || '—') +
+      (b.actualizado ? ' · actualizado: ' + new Date(b.actualizado).toLocaleString('es-PE') : '');
   }
 
   /* ---------- Último evento ---------- */
@@ -558,7 +595,9 @@
           porMinuto: { minutos: mins.map(function (m) { return Object.assign({}, m); }) },
           ultimo: ultimo ? Object.assign({ ahora: new Date().toISOString() }, ultimo) : {},
           rechazos: { rechazos: rejs.slice() },
-          errors: [], total: 6
+          batch: { batch_id: 'batch-simulado', estado: 'JOB_STATE_DONE', entradas: 10000, validos: 8459,
+            rechazados: 1541, zonas: 255, consolidado: true, workers_solicitados: 2, actualizado: new Date().toISOString() },
+          errors: [], total: 7
         };
       }
     };

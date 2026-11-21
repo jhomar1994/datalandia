@@ -1,4 +1,4 @@
-"""Lanza un solo worker privado y vigila su terminación con un límite de tiempo.
+"""Lanza workers privados y vigila su terminación con un límite de tiempo.
 
 El proceso debe permanecer activo mientras exista el job. Los logs y reportes van
 a referencias_locales/dataflow/. No registra tokens ni modifica el proyecto del CLI.
@@ -21,25 +21,41 @@ ROOT = Path(__file__).resolve().parents[1]
 TERMINAL = {"JOB_STATE_DONE", "JOB_STATE_FAILED", "JOB_STATE_CANCELLED", "JOB_STATE_DRAINED", "JOB_STATE_UPDATED"}
 
 
-def main():
+def parse_args(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--mode", choices=["batch", "stream"], required=True)
     parser.add_argument("--input", help="URI GCS de viajes para batch")
     parser.add_argument("--max-minutes", type=int, default=12)
+    parser.add_argument("--workers", type=int, choices=(1, 2, 3), default=1,
+                        help="Workers fijos: hasta tres en batch; streaming conserva uno")
+    parser.add_argument("--staging-report", type=Path, default=ROOT / "referencias_locales/p3_staging.json")
     parser.add_argument("--name")
+    parser.add_argument("--batch-records", type=int, help="Entradas esperadas para registrar la ejecución en el tablero")
     parser.add_argument("--stop-file", type=Path, help="En streaming solicita drain cuando aparece")
-    args = parser.parse_args()
-    if not 3 <= args.max_minutes <= 15:
-        parser.error("El límite de esta demo debe estar entre 3 y 15 minutos")
+    args = parser.parse_args(argv)
+    ceiling = 45 if args.mode == "batch" else 15
+    if not 3 <= args.max_minutes <= ceiling:
+        parser.error(f"El límite para {args.mode} debe estar entre 3 y {ceiling} minutos")
+    if args.mode == "stream" and args.workers != 1:
+        parser.error("Streaming mantiene un worker para controlar el consumo de la demo")
     if args.mode == "batch" and not args.input:
         parser.error("batch requiere --input")
+    if args.batch_records is not None and (args.mode != "batch" or args.batch_records < 1):
+        parser.error("batch-records requiere modo batch y un entero positivo")
+    return args
+
+
+def main():
+    args = parse_args()
     raw = subprocess.run(["terraform", "-chdir=infra/terraform", "output", "-json"], cwd=ROOT,
                          check=True, capture_output=True, text=True).stdout
     config = {key: value["value"] for key, value in json.loads(raw).items()}
     target = config["project"]
     if target["id"] != "proyecto-datalandia" or str(target["number"]) != "637872675138":
         raise ValueError("Destino Terraform no autorizado")
-    staging = json.loads((ROOT / "referencias_locales/p3_staging.json").read_text())
+    staging = json.loads(args.staging_report.read_text())
+    if staging.get("project") != target["id"]:
+        raise ValueError("El reporte de staging pertenece a otro proyecto")
     now = dt.datetime.now(dt.timezone.utc)
     name = args.name or f"lumina-p3-{args.mode}-{now:%Y%m%d%H%M%S}"
     import re
@@ -56,7 +72,7 @@ def main():
         sys.executable, "-m", "pipelines.cloud.pipeline_beam", "--mode", args.mode,
         "--project", target["id"], "--region", target["region"],
         "--runner", "DataflowRunner", "--job_name", name,
-        "--num_workers", "1", "--max_num_workers", "1", "--autoscaling_algorithm", "NONE",
+        "--num_workers", str(args.workers), "--max_num_workers", str(args.workers), "--autoscaling_algorithm", "NONE",
         "--machine_type", "n1-standard-1" if args.mode == "batch" else "n1-standard-2",
         "--disk_size_gb", "30", "--no_use_public_ips",
         "--service_account_email", runtime["service_account_email"],
@@ -110,12 +126,17 @@ def main():
     stop_deadline = None
     transitions = []
     exit_seen = None
+    reporter = None
     print(json.dumps({"name": name, "mode": args.mode, "max_minutes": args.max_minutes,
-                      "workers": 1, "stop_file": str(stop_file), "logs": str(folder / "driver.log")}), flush=True)
+                      "workers_requested": args.workers, "stop_file": str(stop_file), "logs": str(folder / "driver.log")}), flush=True)
     try:
         active = request("GET", base, params={"filter": "ACTIVE", "pageSize": 100}).get("jobs", [])
         if active:
             raise RuntimeError("Ya existe un job activo; no se inicia otro para limitar recursos")
+        if args.batch_records is not None:
+            from batch_status import BatchStatus
+            reporter = BatchStatus(name, args.batch_records, args.workers)
+            reporter.update("PREPARANDO")
         with (folder / "driver.log").open("w") as log:
             child = subprocess.Popen(command, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT,
                                      env={**os.environ, "PYTHONWARNINGS": "ignore"})
@@ -129,6 +150,8 @@ def main():
                         state = current
                         transitions.append({"state": state, "elapsed_seconds": round(time.monotonic() - started)})
                         print(json.dumps({"job_id": job_id, "state": state}), flush=True)
+                        if reporter:
+                            reporter.update(state, job_id)
                     if state in TERMINAL:
                         break
                 if child.poll() is not None and job_id is None:
@@ -191,8 +214,18 @@ def main():
                 child.kill()
         result = {"name": name, "job_id": job_id, "mode": args.mode, "batch_id": name if args.mode == "batch" else None,
                   "project": target["id"], "region": target["region"], "final_state": state,
+                  "workers_requested": args.workers, "autoscaling_algorithm": "NONE",
+                  "machine_type": "n1-standard-1" if args.mode == "batch" else "n1-standard-2",
+                  "disk_gb": 30, "max_minutes": args.max_minutes,
                   "elapsed_seconds": round(time.monotonic() - started), "transitions": transitions,
                   "shutdown_confirmed": state in TERMINAL, "error": error}
+        if reporter:
+            try:
+                reporter.update(state or "ERROR_ENVIO", job_id, counts=state == "JOB_STATE_DONE")
+            except Exception as report_error:
+                result["batch_status_error"] = type(report_error).__name__
+                error = error or "No se pudo actualizar el registro batch del tablero"
+                result["error"] = error
         (folder / "result.json").write_text(json.dumps(result, indent=2) + "\n")
         print(json.dumps(result), flush=True)
     success = state == "JOB_STATE_DONE" if args.mode == "batch" else state in {"JOB_STATE_DRAINED", "JOB_STATE_CANCELLED"}

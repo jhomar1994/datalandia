@@ -10,6 +10,7 @@ Cloud Run `lumina-api`, us-central1, autenticación IAM y cuenta de servicio de 
 |---|---|
 | `/health` | `status, proyecto, dataset, ultima_ingesta`; conserva `project, simulation` por compatibilidad. No hace consultas; última ingesta es null. |
 | `/kpis` | `aceptadas, rechazadas, recibidas, latencia_e2e_s, latencia_meta_s, zonas_activas, ultima_ingesta` |
+| `/batch/ultimo` | `batch_id, estado, entradas, validos, rechazados, zonas, consolidado, workers_solicitados, iniciado, actualizado, dataflow_job_id`; sin ejecuciones registradas: HTTP 200 y `{}`. |
 | `/latencia` | `etapas: [{nombre, servicio, segundos}], total_s` |
 | `/zonas` | `ventana_inicio, ventana_fin, zonas: [{zona_id, lecturas, viajes, importe_km, valor_medio, unidad}]` |
 | `/eventos/por-minuto?min=15` | `minutos: [{minuto, aceptadas, rechazadas}]`; entre 1 y 60, ascendente, exactamente min filas con ceros; último minuto en curso. |
@@ -23,6 +24,19 @@ Los parámetros antiguos mantienen validación de zona, periodo máximo de 31 d�
 Fechas UTC en JSON, valores numéricos como números y ausencia de medición como null.
 
 ## Definiciones y límites
+
+El bloque batch lee `batch_ejecuciones`, una tabla de control aprovisionada con Terraform.
+`demo_batch.py` registra las entradas esperadas y las transiciones observadas por el controlador.
+Tras `DONE`, los válidos y zonas se cuentan en staging por `batch_id`; los rechazos por ID único
+en `rechazados_raw`, con filtro de inicio de ejecución. Los conteos permanecen null mientras
+no se hayan calculado; cero significa un conteo observado de cero. La consolidación solo se
+marca tras completar el MERGE. Los válidos no equivalen a nuevas inserciones: puede haber IDs
+preexistentes. Los workers son solicitados, no una medida de trabajo distribuido.
+La última ejecución se elige por inicio, incluso si falló o fue cancelada. El controlador local
+debe permanecer activo para actualizar el estado; una caída abrupta puede dejarlo desactualizado.
+El timestamp visible permite detectar esto. No se afirma que sea monitoreo independiente de la laptop.
+Este endpoint tiene caché propia de cuatro segundos y consulta limitada a 128 MiB.
+El consumidor consulta ahora siete endpoints por ciclo; los seis originales conservan su consulta compartida.
 
 Sesión por `processed_at`, últimos 120 minutos por defecto. Aceptadas: IDs únicos de sensores,
 con primera recepción dentro del horizonte de consulta de 24 h y sin conflictos conocidos en Gold.

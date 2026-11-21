@@ -1,5 +1,23 @@
 # Pruebas
 
+Demos batch/streaming configurables (sin GCP):
+
+```bash
+.venv_beam/bin/python -m unittest tests.test_demo_entrypoints tests.test_scale_workflow tests.test_dataflow_launcher -v
+```
+
+Verifican volúmenes predeterminados, paso de parámetros, compatibilidad del comando anterior,
+rechazo de ráfagas fuera de plazo y consolidación únicamente después de un batch `DONE`.
+
+Límites del lanzador (sin GCP):
+
+```bash
+.venv_beam/bin/python -m unittest tests.test_dataflow_launcher -v
+```
+
+Comprueban compatibilidad de la demo predeterminada, configuración batch con dos workers
+y rechazo de ampliaciones fuera de los límites antes de acceder a credenciales o recursos.
+
 Pruebas puras de calidad, IDs, reintentos, nodos múltiples, límites temporales y parámetros SQL:
 
 ```bash

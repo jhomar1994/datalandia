@@ -1,0 +1,13 @@
+[
+  {"name":"batch_id","type":"STRING","mode":"REQUIRED"},
+  {"name":"started_at","type":"TIMESTAMP","mode":"REQUIRED"},
+  {"name":"updated_at","type":"TIMESTAMP","mode":"REQUIRED"},
+  {"name":"state","type":"STRING","mode":"REQUIRED"},
+  {"name":"expected_records","type":"INTEGER","mode":"NULLABLE"},
+  {"name":"accepted","type":"INTEGER","mode":"NULLABLE"},
+  {"name":"rejected","type":"INTEGER","mode":"NULLABLE"},
+  {"name":"zones","type":"INTEGER","mode":"NULLABLE"},
+  {"name":"workers_requested","type":"INTEGER","mode":"NULLABLE"},
+  {"name":"dataflow_job_id","type":"STRING","mode":"NULLABLE"},
+  {"name":"consolidated","type":"BOOLEAN","mode":"REQUIRED"}
+]

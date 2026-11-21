@@ -4,6 +4,46 @@ Preparar autenticación, Terraform y entradas según `docs/pipelines_p3.md`.
 Presupuesto acordado para pruebas y demo: S/50. Gasto facturado: NO VERIFICADO.
 No dejar Dataflow encendido entre sesiones.
 
+## Dos demos configurables
+
+Ejecutar desde la raíz, primero batch y, cuando haya terminado y cerrado sus workers, streaming.
+Los comandos inician recursos GCP y generan consumo; mantener la laptop activa.
+
+```bash
+.venv_beam/bin/python scripts/demo_batch.py --records 10000
+```
+
+`demo_batch.py` selecciona viajes TLC reales sin prevalidar, prepara una carpeta por volumen,
+sube el bundle y ejecuta dos workers por defecto, con límite de quince minutos. Consolida
+solo tras `DONE` y comprueba ausencia de jobs/VMs. Cambiar `--records` para otra cantidad,
+`--workers 1` para reducir cómputo o `--max-minutes 30` para un lote mayor.
+Repetir las mismas filas mantiene sus IDs: el MERGE puede no añadir viajes nuevos.
+Los 10.000 son entradas procesadas; los aceptados pueden ser menos.
+El bloque «Última ejecución batch» del tablero muestra el estado y conteos de ese job.
+Para verlo, mantener el proxy y la página abiertos también durante batch. El controlador
+registra estados y calcula conteos tras `DONE`; la marca consolidado aparece tras el MERGE.
+Se requiere haber aplicado la tabla Terraform `batch_ejecuciones` y desplegado la API actualizada.
+
+Para streaming, mantener el proxy de la sección siguiente en otra terminal y abrir el tablero:
+
+```bash
+.venv_beam/bin/python scripts/demo_streaming.py --events 60 --rate 1
+```
+
+`demo_streaming.py` inicia un worker, espera el calentamiento, valida duplicados/conflictos
+y publica sesenta lecturas sintéticas nuevas a una por segundo. `--events` cambia la cantidad
+de lecturas visibles; `--rate` cambia la frecuencia. Ejemplo: `--events 300 --rate 5`.
+La ráfaga está acotada a 120 segundos y 10.000 eventos para conservar el plazo de cierre.
+Además se publican 220 mensajes de replay, cinco controles y hasta dos fixtures inválidos:
+con sesenta nuevos son 287 publicaciones en total. El total lógico del dashboard difiere
+por deduplicación y rechazos. Se conservan los once nodos del replay; la ráfaga visible usa
+un sensor conocido. Al finalizar solicita drain y espera el cierre del controlador.
+
+Los valores iniciales también están en `DEFAULT_RECORDS` y `DEFAULT_EVENTS` en cada archivo.
+El batch demuestra procesamiento finito y consolidación; el streaming demuestra actualización
+de gráfico y último evento. La tabla histórica de zonas no necesariamente cambia al llegar
+la ráfaga. No ejecutar ambas demos en paralelo.
+
 ## Batch
 
 La prueba realizada procesó 10.000 registros y terminó en `JOB_STATE_DONE`.

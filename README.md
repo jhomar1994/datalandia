@@ -53,7 +53,7 @@ data/gold / data/p2/gold
 | Histórico GCP de P2 | Registro de la demostración en el proyecto anterior `datalandia`. |
 | Pipelines cloud P3 | Batch y streaming ejecutados en Dataflow; validación end-to-end con API realizada. |
 | Destino de P3 | `proyecto-datalandia`, número `637872675138`, región `us-central1`. |
-| Infraestructura GCP | Terraform aplicado: red, IAM, buckets, Pub/Sub, siete tablas, cinco vistas, workflow y Cloud Run. |
+| Infraestructura GCP | Terraform: red, IAM, buckets, Pub/Sub, ocho tablas (incluido control batch), cinco vistas, workflow y Cloud Run. |
 | API y consumidor P3 | FastAPI y tablero desplegados en Cloud Run privado; mínimo cero y máximo una instancia. |
 
 El código cloud está en `pipelines/cloud/`, el SQL en `sql/bigquery/` y el workflow en `workflows/`.
@@ -90,7 +90,7 @@ Consultar [guion y apagado](demo/README.md), [API](api/README.md),
 [costos](costs/README.md) y [borrador para Slides](presentation/guion_slides.md).
 Presupuesto total de pruebas y demo: S/50; gasto facturado NO VERIFICADO.
 La ejecución se realiza bajo demanda, sin mantener streaming 24/7.
-El tablero nuevo se revisó en Chrome en modo simulado y con la API. La presentación ejecutiva de quince minutos está disponible en `presentation/output/` (PPTX y PDF). La publicación de los cambios en GitHub sigue pendiente.
+El tablero nuevo se revisó en Chrome en modo simulado y con la API. La presentación ejecutiva de quince minutos está disponible en `presentation/output/` (PPTX y PDF). La entrega P3 se mantiene en la rama `feat/p3-entrega-final`; usar su historial para identificar la versión auditada.
 
 ## Estructura del repositorio
 

@@ -1,5 +1,14 @@
 # Presupuesto y calculadora
 
+La [tabla con redundancia y replicación](primer_ano_redundancia.md) ordena los costos
+de mayor a menor e incluye supuestos de dos jobs streaming zonales y archivo batch dual-region.
+
+Para una simulación empresarial con batch diario y streaming continuo, consultar
+[consumo del primer año](primer_ano_empresa.md), el modelo
+[enterprise_calculator.py](enterprise_calculator.py) y [sus resultados](enterprise_estimate.json).
+La estimación histórica de abajo describe el prototipo; no sustituye ese escenario empresarial.
+Su reserva SECU era un supuesto: el modelo empresarial distingue cobro por volumen y por SECU.
+
 Presupuesto total acordado: **S/50** para pruebas del 20 y demo del 21 de noviembre de 2026 (Lima).
 Gasto real acumulado y créditos: **NO VERIFICADO**. No se presume gratuidad ni un límite automático de S/50.
 Distribución de planificación: pruebas S/20, demo S/15 y reserva S/15.

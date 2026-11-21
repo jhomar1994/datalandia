@@ -1,5 +1,9 @@
 locals {
   tables = {
+    batch_ejecuciones = {
+      partition  = "started_at"
+      clustering = ["batch_id"]
+    }
     viajes_staging = {
       partition  = "processed_at"
       clustering = ["batch_id", "origin_id"]

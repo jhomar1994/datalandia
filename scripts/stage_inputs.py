@@ -16,6 +16,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, default=ROOT / "data/p3/input")
     parser.add_argument("--load-references", action="store_true")
+    parser.add_argument("--report", type=Path, default=ROOT / "referencias_locales/p3_staging.json",
+                        help="Ruta local del reporte; usar otra para una prueba independiente")
     args = parser.parse_args()
     manifest = json.loads((args.input / "manifest.json").read_text())
     payload = dict(manifest)
@@ -69,7 +71,7 @@ def main():
             job.result()
             loads[name] = {"job_id": job.job_id, "rows": job.output_rows}
     report = {"project": project["id"], "bundle_id": bundle_id, "uris": uris, "reference_loads": loads}
-    path = ROOT / "referencias_locales/p3_staging.json"
+    path = args.report
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report, indent=2))

@@ -1,6 +1,7 @@
 # Contratos y esquemas
 
-`bigquery/*.json` contiene los siete esquemas compartidos por Terraform, cargas de referencia y Beam.
+`bigquery/*.json` contiene ocho esquemas: siete de datos y uno de control de ejecuciones batch.
+Terraform aprovisiona todos; Beam y las cargas utilizan los correspondientes a sus salidas.
 Los identificadores de viajes y eventos, hashes de contenido y `batch_id` de staging son obligatorios.
 
 Las reglas puras se encuentran en `pipelines/cloud/validaciones.py`.

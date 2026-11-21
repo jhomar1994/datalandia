@@ -14,7 +14,10 @@ def main():
     parser.add_argument("--dataset", default="lumina_demo")
     parser.add_argument("--region", default="us-central1")
     parser.add_argument("--batch-id", required=True)
+    parser.add_argument("--record-status", action="store_true", help="Marcar consolidación en el registro batch del tablero")
     args = parser.parse_args()
+    if args.record_status and (args.project != "proyecto-datalandia" or args.dataset != "lumina_demo"):
+        parser.error("El registro batch solo está habilitado en el destino de la demo")
     from google.cloud import bigquery
     client = bigquery.Client(project=args.project)
     config = bigquery.QueryJobConfig(
@@ -24,6 +27,9 @@ def main():
     job = client.query(render_sql("finalizar_batch.sql", args.project, args.dataset),
                        location=args.region, job_config=config)
     job.result()
+    if args.record_status:
+        from batch_status import mark_consolidated
+        mark_consolidated(args.batch_id)
     print(json.dumps({"job_id": job.job_id, "batch_id": args.batch_id, "state": job.state,
                       "bytes_processed": job.total_bytes_processed}))
 

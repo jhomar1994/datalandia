@@ -60,6 +60,16 @@ class BigQueryRepository:
         return self.cached("zones", 3600, lambda: self.query(
             f"SELECT datalandia_zone_id zone_id,zone_name,borough,population_2017 FROM {self.table('referencia_zona')} ORDER BY zone_id"))
 
+    def dashboard_batch(self):
+        def fetch():
+            rows = self.query(f"""SELECT batch_id,state estado,expected_records entradas,
+                accepted validos,rejected rechazados,zones zonas,consolidated consolidado,
+                workers_requested workers_solicitados,started_at iniciado,updated_at actualizado,
+                dataflow_job_id FROM {self.table('batch_ejecuciones')}
+                ORDER BY started_at DESC,batch_id DESC LIMIT 1""")
+            return rows[0] if rows else {}
+        return self.cached("batch_latest", self.settings.cache_ttl, fetch)
+
     def metrics(self, zone, start, end, limit):
         from google.cloud import bigquery
         def fetch():

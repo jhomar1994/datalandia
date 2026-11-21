@@ -19,14 +19,29 @@ from google.cloud import pubsub_v1
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def main():
+def parse_args(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--api-url", default="http://127.0.0.1:8080")
-    parser.add_argument("--visible-seconds", type=int, default=0,
+    visible = parser.add_mutually_exclusive_group()
+    visible.add_argument("--visible-seconds", type=int, default=0,
                         help="Opcional: hasta 60 s de eventos nuevos para observar el tablero")
-    args = parser.parse_args()
+    visible.add_argument("--events", type=int, help="Cantidad de eventos nuevos visibles (1..10000)")
+    parser.add_argument("--rate", type=float, default=1, help="Eventos nuevos por segundo (0.5..100)")
+    args = parser.parse_args(argv)
     if not 0 <= args.visible_seconds <= 60:
         parser.error("visible-seconds debe estar entre cero y sesenta")
+    if not 0.5 <= args.rate <= 100:
+        parser.error("rate debe estar entre 0.5 y 100")
+    if args.events is not None and not 1 <= args.events <= 10000:
+        parser.error("events debe estar entre 1 y 10000")
+    args.live_events = args.events if args.events is not None else args.visible_seconds
+    if args.live_events / args.rate > 120:
+        parser.error("La ráfaga debe durar como máximo 120 segundos; reducir events o aumentar rate")
+    return args
+
+
+def main(argv=None):
+    args = parse_args(argv)
     base = args.api_url.rstrip("/")
     try:
         health = requests.get(base + "/health", timeout=30)
@@ -146,17 +161,18 @@ def main():
         metrics = requests.get(base + "/api/metrics", timeout=30)
         metrics.raise_for_status()
         result["metrics"] = metrics.json()
-        if args.visible_seconds:
+        if args.live_events:
             print("Worker listo: publicando eventos nuevos para observar el gráfico y la tarjeta.", flush=True)
             fixture = [json.loads(line) for line in (ROOT / "tests/fixtures/viajes_errores_demo.jsonl").open()]
-            for i in range(args.visible_seconds):
+            burst_start = time.monotonic()
+            for i in range(args.live_events):
                 publish(dict(control, event_id=event_id + f"-live-{i}", value=10 + i / 10))
                 if i < len(fixture):
                     # Datos de viajes en la entrada de sensores: rechazo deliberado de contrato.
                     publish(dict(fixture[i], event_id=event_id + f"-fixture-{i}"))
-                time.sleep(1)
+                time.sleep(max(0, burst_start + (i + 1) / args.rate - time.monotonic()))
             # Esperar visibilidad del último ID de esta ráfaga, sin confundir datos anteriores.
-            last_id = event_id + f"-live-{args.visible_seconds - 1}"
+            last_id = event_id + f"-live-{args.live_events - 1}"
             for _ in range(12):
                 last = requests.get(base + "/eventos/ultimo", timeout=30)
                 chart = requests.get(base + "/eventos/por-minuto?min=15", timeout=30)
@@ -164,7 +180,8 @@ def main():
                     points = chart.json()["minutos"]
                     if len(points) == 15 and any(p["aceptadas"] for p in points) and any(p["rechazadas"] for p in points):
                         result["dashboard_live"] = {"ultimo": last.json(), "por_minuto": chart.json(),
-                                                    "new_events": args.visible_seconds, "fixture_messages": len(fixture)}
+                                                    "new_events": args.live_events, "rate": args.rate,
+                                                    "fixture_messages": min(args.live_events, len(fixture))}
                         break
                 time.sleep(5)
             else:
